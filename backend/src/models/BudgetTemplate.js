@@ -44,6 +44,7 @@ const budgetTemplateSchema = new Schema({
     deletedDate: Date,
 },
 {
+    collection: 'budget_templates',
     timestamps: { createdAt: 'createdDate', updatedAt: 'updatedDate' },
 });
 
