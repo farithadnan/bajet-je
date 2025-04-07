@@ -64,5 +64,8 @@ userSchema.methods.toSafeObject = function () {
     return { _id, username, email, isActive };
 };
 
+// Unique index for username and email
+userSchema.index({ username: 1, email: 1 }, { unique: true });
+
 const User = model('User', userSchema);
 export default User;
