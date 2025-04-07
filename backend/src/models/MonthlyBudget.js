@@ -101,6 +101,7 @@ const monthlyBudgetSchema = new Schema({
     deletedDate: Date,
 },
 {
+    collection: 'monthly_budgets',
     timestamps: { createdAt: 'createdDate', updatedAt: 'updatedDate' },
 });
 
@@ -139,9 +140,9 @@ monthlyBudgetSchema.virtual('budgetSummary').get(function() {
     // Initialize summary with all labels and their alloted amounts
     this.formula.forEach(item => {
         summary[item.label] = {
-            allocated: item.allotedAmount || (item.percentage / 100) * this.totalIncome,
+            allocated: item.allocatedAmount || (item.percentage / 100) * this.totalIncome,
             spent: 0,
-            remaining: item.allotedAmount || (item.percentage / 100) * this.totalIncome,
+            remaining: item.allocatedAmount || (item.percentage / 100) * this.totalIncome,
         };
     });
 
