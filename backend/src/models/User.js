@@ -58,17 +58,7 @@ userSchema.virtual('isActive').get(function(){
     return this.status === true && !this.deletedDate;
 });
 
-// Return a user object without sensitive information
-// userSchema.methods.toJSON = function() {
-//     const user = this;
-//     const userObject = user.toObject();
 
-//     // Remove sensitive information
-//     delete userObject.passwordHash;
-//     delete userObject.__v;
-
-//     return userObject;
-// };
 userSchema.methods.toSafeObject = function () {
     const { _id, username, email, isActive } = this;
     return { _id, username, email, isActive };
