@@ -1,16 +1,10 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../../src/models/User.js";
-import { validationResult } from "express-validator";
 import { generateAccessToken, generateRefreshToken } from "../../src/middleware/auth.js";
 
 export const registerUser = async (req, res) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
         const { username, email, password, role } = req.body;
         const existingUser = await User.findOne({ $or: [{ username }, { email }] });
 
@@ -55,11 +49,6 @@ export const registerUser = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
         const { email, password } = req.body;
         const existingUser = await User.findOne({ email });
 
@@ -142,9 +131,6 @@ export const refreshAccessToken = async (req, res) => {
 
 export const getCurrentUser = async (req, res) => {
     try {
-        if (!req.user || !req.user.userId) {
-            return res.status(401).json({ message: "Unauthorized" });
-        }
         const user = await User.findById(req.user.userId);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
