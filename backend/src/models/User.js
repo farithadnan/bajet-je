@@ -33,6 +33,10 @@ const userSchema = new Schema({
         type: Boolean,
         default: true,
     },
+    refreshToken: {
+        type: String,
+        default: null,
+    },
     lastLogin: Date,
     lastLoginIp: String,
     lastLoginLocation: String,
@@ -45,6 +49,7 @@ const userSchema = new Schema({
     deletedDate: Date,
 },
 {
+    collection: 'users',
     timestamps: { createdAt: 'createdDate', updatedAt: 'updatedDate' },
 });
 
@@ -54,15 +59,19 @@ userSchema.virtual('isActive').get(function(){
 });
 
 // Return a user object without sensitive information
-userSchema.methods.toJSON = function() {
-    const user = this;
-    const userObject = user.toObject();
+// userSchema.methods.toJSON = function() {
+//     const user = this;
+//     const userObject = user.toObject();
 
-    // Remove sensitive information
-    delete userObject.passwordHash;
-    delete userObject.__v;
+//     // Remove sensitive information
+//     delete userObject.passwordHash;
+//     delete userObject.__v;
 
-    return userObject;
+//     return userObject;
+// };
+userSchema.methods.toSafeObject = function () {
+    const { _id, username, email, isActive } = this;
+    return { _id, username, email, isActive };
 };
 
 const User = model('User', userSchema);
