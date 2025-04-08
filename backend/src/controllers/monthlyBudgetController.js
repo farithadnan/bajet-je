@@ -1,16 +1,22 @@
 import MonthlyBudget from "../../src/models/MonthlyBudget.js";
-
+import BudgetTemplate from "../../src/models/BudgetTemplate.js";
 
 // Create new monthly budget
 export const createMonthlyBudget = async (req, res) => {
     try {
-        const { month, year, totalIncome, formula, expenses } = req.body;
-        const existingBudget = await MonthlyBudget.findOne({ month, year, userId: req.user.userId });
-        if (existingBudget) {
+        const { budgetTemplateId, month, year, totalIncome, formula, expenses } = req.body;
+        const monthlyBudget = await MonthlyBudget.findOne({ month, year, userId: req.user.userId });
+        if (monthlyBudget) {
             return res.status(400).json({ message: "Monthly budget for this month and year already exists" });
         }
 
-        const monthlyBudget = new MonthlyBudget({
+        const existingBudgetTemplate = await BudgetTemplate.findById(budgetTemplateId);
+        if (!existingBudgetTemplate) {
+            return res.status(400).json({ message: "Budget template not found" });
+        }
+
+        const newMonthlyBudget = new MonthlyBudget({
+            budgetTemplateId,
             month,
             year,
             totalIncome,
@@ -20,7 +26,7 @@ export const createMonthlyBudget = async (req, res) => {
             createdBy: req.user.username,
         });
 
-        const savedBudget = await monthlyBudget.save();
+        const savedBudget = await newMonthlyBudget.save();
         res.status(201).json({
             message: "Monthly budget created successfully",
             monthlyBudget: savedBudget,
@@ -77,10 +83,28 @@ export const getMonthlyBudgetById = async (req, res) => {
 // Update monthly budget by id
 export const updateMonthlyBudgetById = async (req, res) => {
     try {
-        const { month, year, totalIncome, formula, expenses, status } = req.body;
+        const { budgetTemplateId, month, year, totalIncome, formula, expenses, status } = req.body;
         const monthlyBudget = await MonthlyBudget.findById(req.params.id);
         if (!monthlyBudget) {
             return res.status(404).json({ message: "Monthly budget not found" });
+        }
+
+        const duplicateBudget = await MonthlyBudget.findOne({
+            userId: req.user.userId,
+            month,
+            year,
+            _id: { $ne: req.params.id },
+        });
+        if (duplicateBudget) {
+            return res.status(400).json({ message: "Monthly budget for this month and year already exists" });
+        }
+
+        if (budgetTemplateId) {
+            const existingBudgetTemplate = await BudgetTemplate.findById(budgetTemplateId);
+            if (!existingBudgetTemplate) {
+                return res.status(400).json({ message: "Budget template not found" });
+            }
+            monthlyBudget.budgetTemplateId = budgetTemplateId; // Update directly
         }
 
         monthlyBudget.month = month !== undefined ? month : monthlyBudget.month;
