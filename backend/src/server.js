@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import authRoutes from "../src/routes/authRoutes.js";
 import userRoutes from "../src/routes/userRoutes.js";
+import budgetTemplateRoutes from "../src/routes/budgetTemplateRoutes.js";
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/budget-templates", budgetTemplateRoutes);
 
 mongoose.connect(process.env.DB_URI)
     .then(() => {
