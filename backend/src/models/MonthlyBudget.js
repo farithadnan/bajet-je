@@ -16,15 +16,6 @@ const expensesSchema = new Schema({
         type: String,
         required: [true, 'Label is required'],
     },
-    percentage: {
-        type: Number,
-        validate: {
-            validator: function(value) {
-                return value >= 0 && value <= 100;
-            },
-            message: 'Percentage must be between 0 and 100',
-        },
-    },
     expensedDate: {
         type: Date,
         default: Date.now,
@@ -49,7 +40,9 @@ const formulaItemSchema = new Schema({
     },
     allocatedAmount: {
         type: Number,
-        min: [0, 'Allocated amount cannot be negative'],
+        default: function() {
+            return (this.percentage / 100) * this.totalIncome;
+        }
     }
 });
 
@@ -89,6 +82,26 @@ const monthlyBudgetSchema = new Schema({
         required: [true, 'Total income is required'],
         min: [0, 'Total income must be positive'],
     },
+    totalExpenses: {
+        type: Number,
+        default: function() {
+            return this.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+        },
+    },
+    remainingAmount: {
+        type: Number,
+        default: function() {
+            return this.totalIncome - this.totalExpenses;
+        },
+    },
+    overBudgetAmount: {
+        type: Number,
+        default: function() {
+            return this.totalExpenses > this.totalIncome
+                ? this.totalExpenses - this.totalIncome
+                : 0;
+        },
+    },
     formula: [formulaItemSchema],
     expenses: [expensesSchema],
     status: {
@@ -105,11 +118,38 @@ const monthlyBudgetSchema = new Schema({
     timestamps: { createdAt: 'createdDate', updatedAt: 'updatedDate' },
 });
 
+// Calculate total expenses before saving
+monthlyBudgetSchema.pre('save', function(next) {
+    if (this.expenses && this.expenses.length > 0) {
+        this.totalExpenses = this.expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    } else {
+        this.totalExpenses = 0;
+    }
+    next();
+});
+
+
+// Calculate remaining amount before saving
+monthlyBudgetSchema.pre('save', function(next) {
+    this.remainingAmount = this.totalIncome - this.totalExpenses;
+    next();
+});
+
+// Calculate over budget amount before saving
+monthlyBudgetSchema.pre('save', function(next) {
+    this.overBudgetAmount = this.totalExpenses > this.totalIncome
+        ? this.totalExpenses - this.totalIncome
+        : 0;
+    next();
+});
+
+
 // Calculate alloted amount before saving
 monthlyBudgetSchema.pre('save', function(next) {
-    if (this.formula && this.formula.length > 0 && this.totalIncome) {
+    if (this.formula && this.formula.length > 0) {
+        const totalIncome = this.totalIncome || 0; // Default to 0 if totalIncome is undefined
         this.formula.forEach(item => {
-            item.allocatedAmount = (item.percentage / 100) * this.totalIncome;
+            item.allocatedAmount = (item.percentage / 100) * totalIncome;
         });
     }
     next();
