@@ -3,12 +3,6 @@ import User from "../../src/models/User.js";
 
 export const getAllUsers = async (req, res) => {
     try {
-        // Check if user exists
-        const user = await User.findById(req.user.userId);
-        if (!user) {
-            return res.status(404).json({ message: "Unauthorized" });
-        }
-
         // Return all users
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
@@ -25,7 +19,7 @@ export const getAllUsers = async (req, res) => {
             users: users,
             totalUsers,
             totalPages: Math.ceil(totalUsers / limit),
-            currentPage: parseInt(page, 10),
+            currentPage: page,
         });
     }
     catch (error) {
