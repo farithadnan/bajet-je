@@ -75,16 +75,17 @@ export const getBudgetTemplateById = async (req, res) => {
 // Update template by id
 export const updateBudgetTemplateById = async (req, res) => {
     try {
-        const { templateName, formula } = req.body;
+        const { templateName, formula, status } = req.body;
         const budgetTemplate = await BudgetTemplate.findById(req.params.id);
 
         if (!budgetTemplate) {
             return res.status(404).json({ message: "Budget template not found" });
         }
 
-        budgetTemplate.templateName = templateName || budgetTemplate.templateName;
-        budgetTemplate.formula = formula || budgetTemplate.formula;
+        budgetTemplate.templateName = templateName !== undefined ? templateName : budgetTemplate.templateName;
+        budgetTemplate.formula = formula !== undefined ? formula : budgetTemplate.formula;
         budgetTemplate.updatedBy = req.user.username;
+        budgetTemplate.status = status !== undefined ? status : budgetTemplate.status;
 
         const updatedTemplate = await budgetTemplate.save();
         res.json({
