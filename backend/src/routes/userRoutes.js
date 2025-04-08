@@ -11,6 +11,6 @@ router.get('/', authenticateUser, isAdmin, getAllUsers);
 router.get('/:id', authenticateUser, isAdmin, getUserById);
 
 router.put('/:id', authenticateUser, handleValidation, updateUser);
-router.delete('/delete-user/:id', authenticateUser, isAdmin, deleteUser);
+router.delete('/:id', authenticateUser, isAdmin, deleteUser);
 
 export default router;
