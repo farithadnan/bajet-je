@@ -31,71 +31,91 @@ export const createBudgetTemplate = async (req, res) => {
 
 // Get all templates
 export const getAllBudgetTemplates = async (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
 
-    const budgetTemplates = await BudgetTemplate.find({ userId: req.user.userId })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .select("-__v -userId")
-        .lean();
+        const budgetTemplates = await BudgetTemplate.find({ userId: req.user.userId })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .select("-__v -userId")
+            .lean();
 
-    const totalTemplates = await BudgetTemplate.countDocuments({ userId: req.user.userId });
-    res.json({
-        budgetTemplates,
-        totalTemplates,
-        totalPages: Math.ceil(totalTemplates / limit),
-        currentPage: page,
-    });
+        const totalTemplates = await BudgetTemplate.countDocuments({ userId: req.user.userId });
+        res.json({
+            budgetTemplates,
+            totalTemplates,
+            totalPages: Math.ceil(totalTemplates / limit),
+            currentPage: page,
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
 };
 
 // Get template by id
 export const getBudgetTemplateById = async (req, res) => {
-    const budgetTemplate = await BudgetTemplate.findById(req.params.id)
-        .select("-__v -userId")
-        .lean();
+    try {
+        const budgetTemplate = await BudgetTemplate.findById(req.params.id)
+            .select("-__v -userId")
+            .lean();
 
-    if (!budgetTemplate) {
-        return res.status(404).json({ message: "Budget template not found" });
+        if (!budgetTemplate) {
+            return res.status(404).json({ message: "Budget template not found" });
+        }
+
+        res.json(budgetTemplate);
     }
-
-    res.json(budgetTemplate);
+    catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
 };
 
 // Update template by id
 export const updateBudgetTemplateById = async (req, res) => {
-    const { templateName, formula } = req.body;
-    const budgetTemplate = await BudgetTemplate.findById(req.params.id);
+    try {
+        const { templateName, formula } = req.body;
+        const budgetTemplate = await BudgetTemplate.findById(req.params.id);
 
-    if (!budgetTemplate) {
-        return res.status(404).json({ message: "Budget template not found" });
+        if (!budgetTemplate) {
+            return res.status(404).json({ message: "Budget template not found" });
+        }
+
+        budgetTemplate.templateName = templateName || budgetTemplate.templateName;
+        budgetTemplate.formula = formula || budgetTemplate.formula;
+        budgetTemplate.updatedBy = req.user.username;
+
+        const updatedTemplate = await budgetTemplate.save();
+        res.json({
+            message: "Budget template updated successfully",
+            budgetTemplate: updatedTemplate,
+        });
     }
-
-    budgetTemplate.templateName = templateName || budgetTemplate.templateName;
-    budgetTemplate.formula = formula || budgetTemplate.formula;
-    budgetTemplate.updatedBy = req.user.username;
-
-    const updatedTemplate = await budgetTemplate.save();
-    res.json({
-        message: "Budget template updated successfully",
-        budgetTemplate: updatedTemplate,
-    });
+    catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
 };
 
 // Soft delete template by id
 export const softDeleteBudgetTemplateById = async (req, res) => {
-    const budgetTemplate = await BudgetTemplate.findById(req.params.id);
+    try {
+        const budgetTemplate = await BudgetTemplate.findById(req.params.id);
 
-    if (!budgetTemplate) {
-        return res.status(404).json({ message: "Budget template not found" });
+        if (!budgetTemplate) {
+            return res.status(404).json({ message: "Budget template not found" });
+        }
+
+        budgetTemplate.status = false;
+        budgetTemplate.deletedBy = req.user.username;
+        budgetTemplate.deletedDate = new Date();
+
+        await budgetTemplate.save();
+        res.status(200).json({
+            message: "Budget template deleted successfully",
+        });
     }
-
-    budgetTemplate.status = false;
-    budgetTemplate.deletedBy = req.user.username;
-    budgetTemplate.deletedDate = new Date();
-
-    await budgetTemplate.save();
-    res.status(200).json({
-        message: "Budget template deleted successfully",
-    });
+    catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
 };
