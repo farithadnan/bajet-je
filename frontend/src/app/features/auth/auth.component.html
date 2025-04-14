@@ -1,0 +1,30 @@
+<div class="flex h-screen flex-col md:flex-row">
+  <!-- Sign In/Sign Up Section -->
+  <div class="w-full md:w-1/2 flex items-center justify-center p-8 min-h-screen md:min-h-0">
+    <div class="w-full max-w-md space-y-4">
+      <h2 class="text-2xl font-bold">Login</h2>
+      <!-- <input type="username" placeholder="Username" class="w-full border p-2 rounded" />  -->
+      <input type="email" placeholder="Email" class="w-full border p-2 rounded" />
+      <input type="password" placeholder="Password" class="w-full border p-2 rounded" />
+      <div class="flex items-center justify-between mb-4 w-full">
+        <div class="flex items-center">
+        <input id="remember-me-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600">
+        <label for="remember-me-checkbox" class="ms-2 text-sm font-medium  dark:text-gray-700">Remember me?</label>
+      </div>
+      <a href="#" class="text-sm font-medium dark:text-gray-700 hover:text-blue-600 hover:underline">Forgot password?</a>
+      </div>
+      <button class="w-full bg-blue-600 text-white p-2 rounded">Login</button>
+
+      <div class="text-center mt-4">
+        <label for="" class="mr-1 text-sm font-medium dark:text-gray-700">Don't have account?</label>
+        <a href="#" class="text-sm font-medium dark:text-gray-700 hover:text-blue-600 hover:underline">Sign up</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Image Section (hidden on mobile) -->
+  <div class="hidden md:block w-1/2">
+    <img src="https://images.unsplash.com/photo-1742590794310-04fc4d2025f2?q=80&w=1587&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Side visual" class="h-full w-full object-cover" />
+  </div>
+</div>
