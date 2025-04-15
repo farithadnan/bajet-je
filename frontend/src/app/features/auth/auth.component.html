@@ -1,26 +1,104 @@
 <div class="flex h-screen flex-col md:flex-row">
-  <!-- Sign In/Sign Up Section -->
   <div class="w-full md:w-1/2 flex items-center justify-center p-8 min-h-screen md:min-h-0">
-    <div class="w-full max-w-md space-y-4">
-      <h2 class="text-2xl font-bold">Login</h2>
-      <!-- <input type="username" placeholder="Username" class="w-full border p-2 rounded" />  -->
-      <input type="email" placeholder="Email" class="w-full border p-2 rounded" />
-      <input type="password" placeholder="Password" class="w-full border p-2 rounded" />
-      <div class="flex items-center justify-between mb-4 w-full">
-        <div class="flex items-center">
-        <input id="remember-me-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600">
-        <label for="remember-me-checkbox" class="ms-2 text-sm font-medium  dark:text-gray-700">Remember me?</label>
-      </div>
-      <a href="#" class="text-sm font-medium dark:text-gray-700 hover:text-blue-600 hover:underline">Forgot password?</a>
-      </div>
-      <button class="w-full bg-blue-600 text-white p-2 rounded">Login</button>
+    <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="w-full max-w-md space-y-4">
+      <h2 class="text-2xl font-bold">{{ isLoginMode ? 'Sign In' : 'Create Account'}}</h2>
 
+      <!-- Username field (Only for registration) -->
+      <ng-container *ngIf="!isLoginMode">
+        <div class="space-y-1">
+          <input
+            id="username"
+            type="text"
+            placeholder="Username"
+            autocomplete="username"
+            formControlName="username"
+            (blur)="onBlur('username')"
+            [appAutofocus]="!isLoginMode"
+            class="w-full border p-2 rounded"
+          />
+          <ng-container *ngIf="authForm.get('username')?.invalid && authForm.get('username')?.dirty">
+            <div class="text-red-500 text-sm">
+              <span *ngIf="authForm.get('username')?.hasError('required')">Username is required</span>
+              <span *ngIf="authForm.get('username')?.hasError('minlength')">Username must be at least 5 characters</span>
+            </div>
+          </ng-container>
+        </div>
+      </ng-container>
+
+      <!-- Email field -->
+      <div class="space-y-1">
+        <input
+          id="email"
+          type="email"
+          placeholder="Email"
+          autocomplete="email"
+          formControlName="email"
+          (blur)="onBlur('email')"
+          [appAutofocus]="isLoginMode"
+          class="w-full border p-2 rounded"
+        />
+        <ng-container *ngIf="authForm.get('email')?.invalid && authForm.get('email')?.dirty">
+          <div class="text-red-500 text-sm">
+            <span *ngIf="authForm.get('email')?.hasError('required')">Email is required</span>
+            <span *ngIf="authForm.get('email')?.hasError('email')">Please enter a valid email</span>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Password field -->
+      <div class="space-y-1">
+        <input
+          id="password"
+          type="password"
+          placeholder="Password"
+          formControlName="password"
+          (blur)="onBlur('password')"
+          [attr.autocomplete]="isLoginMode ? 'current-password' : 'new-password'"
+          class="w-full border p-2 rounded"
+        />
+        <ng-container *ngIf="authForm.get('password')?.invalid && authForm.get('password')?.dirty">
+          <div class="text-red-500 text-sm">
+              <span *ngIf="authForm.get('password')?.hasError('required')">Password is required</span>
+              <span *ngIf="authForm.get('password')?.hasError('minlength')">Password must be at least 8 characters</span>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Remember me and forgot password (only for login) -->
+      <ng-container *ngIf="isLoginMode">
+        <div class="flex items-center justify-between mb-4 w-full">
+          <div class="flex items-center">
+            <input
+              id="remember-me-checkbox"
+              type="checkbox"
+              formControlName="rememberMe"
+              class="w-4 h-4 text-blue-600"
+            >
+            <label for="remember-me-checkbox" class="ms-2 text-sm font-medium  text-gray-700">Remember me?</label>
+          </div>
+          <span class="text-sm font-medium text-blue-600 hover:underline hover:cursor-pointer">Forgot password?</span>
+        </div>
+      </ng-container>
+
+      <!-- Submit button -->
+      <button
+        type="submit"
+        [disabled]="authForm.invalid"
+        class="w-full bg-blue-600 text-white p-2 rounded"
+      >
+        {{ isLoginMode ? "Sign In" : "Create Account" }}
+      </button>
+
+      <!-- Toggle mode link -->
       <div class="text-center mt-4">
-        <label for="" class="mr-1 text-sm font-medium dark:text-gray-700">Don't have account?</label>
-        <a href="#" class="text-sm font-medium dark:text-gray-700 hover:text-blue-600 hover:underline">Sign up</a>
+        <span class="mr-1 text-sm font-medium text-gray-700">
+          {{ isLoginMode ? "Don't have account?" : "Already have an account?" }}
+        </span>
+        <span (click)="toggleMode()" class="text-sm font-medium text-blue-600 underline hover:cursor-pointer">
+          {{ isLoginMode ? "Register now" : "Log in" }}
+        </span>
       </div>
-
-    </div>
+    </form>
   </div>
 
   <!-- Image Section (hidden on mobile) -->
