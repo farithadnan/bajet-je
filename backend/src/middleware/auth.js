@@ -4,18 +4,28 @@ import User from "../../src/models/User.js";
 // Generate jwt token for user
 export const generateAccessToken = (user, secret) => {
     return jwt.sign(
-        { userId: user._id, username: user.username, email: user.email, role: user.role },
+        { 
+            userId: user._id, 
+            username: user.username, 
+            email: user.email, 
+            role: user.role 
+        },
         secret,
         { expiresIn: "15m" }
     );
 };
 
 // Generate refresh token for user
-export const generateRefreshToken = (user, secret) => {
+export const generateRefreshToken = (user, secret, expiresIn = '7d') => {
     return jwt.sign(
-        { userId: user._id, username: user.username, email: user.email, role: user.role },
+        { 
+            userId: user._id, 
+            username: user.username, 
+            email: user.email, 
+            role: user.role 
+        },
         secret,
-        { expiresIn: "7d" }
+        { expiresIn }
     );
 };
 
