@@ -16,6 +16,7 @@ import { AutoFocusDirective } from '../../shared/directives/autofocus.directive'
 })
 export class AuthComponent implements OnInit {
   authForm: FormGroup;
+  showPassword = true;
   isLoginMode = true;
 
   constructor(private fb: FormBuilder) {
@@ -57,6 +58,10 @@ export class AuthComponent implements OnInit {
     this.isLoginMode = !this.isLoginMode;
     this.updateFormFields();
     this.authForm.reset();
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
   onBlur(controlName: string): void {
