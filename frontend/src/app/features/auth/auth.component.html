@@ -84,7 +84,14 @@
       <button
         type="submit"
         [disabled]="authForm.invalid"
-        class="w-full bg-blue-600 text-white p-2 rounded"
+        class="
+          w-full
+          bg-blue-600
+          hover:bg-blue-700
+          text-white
+          p-2
+          rounded
+        "
       >
         {{ isLoginMode ? "Sign In" : "Create Account" }}
       </button>
