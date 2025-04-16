@@ -73,7 +73,7 @@ export class AuthService {
   }
 
   login(loginData: LoginData): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, loginData)
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, loginData, { withCredentials: true })
       .pipe(
         tap(response => {
           this.accessToken = response.accessToken;
@@ -85,7 +85,7 @@ export class AuthService {
   }
 
   register(registerData: RegisterData): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register`, registerData)
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register`, registerData, { withCredentials: true })
       .pipe(
         tap(response => {
           this.accessToken = response.accessToken;
@@ -97,7 +97,7 @@ export class AuthService {
   }
 
   logout(): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.apiUrl}/auth/logout`, {})
+    return this.http.post<{ message: string }>(`${this.apiUrl}/auth/logout`, {}, { withCredentials: true })
       .pipe(
         tap(() => {
           this.clearAuthData();
@@ -110,7 +110,9 @@ export class AuthService {
   }
 
   refreshToken(): Observable<{ accessToken: string }> {
-    return this.http.post<{ accessToken: string }>(`${this.apiUrl}/auth/refresh-token`, {})
+    return this.http.post<{ accessToken: string }>(`${this.apiUrl}/auth/refresh-token`, {}, {
+      withCredentials: true
+    })
       .pipe(
         tap(response => {
           this.accessToken = response.accessToken;
@@ -128,7 +130,9 @@ export class AuthService {
       );
     }
 
-    return this.http.get<{ user: User }>(`${this.apiUrl}/auth/me`)
+    return this.http.get<{ user: User }>(`${this.apiUrl}/auth/me`, {
+      withCredentials: true
+    })
       .pipe(
         catchError(this.handleError)
       );
@@ -136,9 +140,11 @@ export class AuthService {
 
   changePassword(oldPassword: string, newPassword: string): Observable<{ message: string }> {
     return this.http.put<{ message: string }>(`${this.apiUrl}/users/change-password`, {
-      oldPassword,
-      newPassword
-    }).pipe(
+        oldPassword,
+        newPassword
+      },
+      { withCredentials: true}
+    ).pipe(
       catchError(this.handleError)
     );
   }
