@@ -12,13 +12,16 @@ export const registerUser = async (req, res) => {
             return res.status(400).json({ message: "Username or email already exists" });
         }
 
+        const userCount = await User.countDocuments();
+        const userRole = userCount === 0 ? "admin" : role || "user";
+
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
 
         const user = new User({
             username,
             email,
-            role,
+            role: userRole,
             passwordHash,
             createdBy: 'system',
         })
