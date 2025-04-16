@@ -40,11 +40,6 @@ export class AuthComponent implements OnInit {
 
   ngOnInit(): void {
     this.updateFormFields();
-
-    this.authService.initializeUserData();
-    if (this.authService.isLoggedIn) {
-      this.router.navigate(['/dashboard']);
-    }
   }
 
   updateFormFields(): void {

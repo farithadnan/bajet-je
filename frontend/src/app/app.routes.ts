@@ -3,11 +3,13 @@ import { AuthComponent } from './features/auth/auth.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { LayoutComponent } from './shared/components/layout/layout.component';
 import { AuthGuard } from './core/guards/auth.guard';
+import { LoginGuard } from './core/guards/login.guard';
 
 export const routes: Routes = [
   {
     path: 'auth',
-    component: AuthComponent
+    component: AuthComponent,
+    canActivate: [LoginGuard]
   },
   {
     path: '',
@@ -20,6 +22,11 @@ export const routes: Routes = [
         data: { title: 'Dashboard' }
       },
     ]
+  },
+  {
+    path: '',
+    redirectTo: 'dashboard',
+    pathMatch: 'full'
   },
   {
     path: '*',
