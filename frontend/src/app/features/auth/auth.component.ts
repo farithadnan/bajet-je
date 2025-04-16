@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AutoFocusDirective } from '../../shared/directives/autofocus.directive';
 import { passwordStrengthValidator } from '../../shared/validators/password-strength.validator';
+import { AuthService } from '../../shared/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-auth',
@@ -20,8 +22,14 @@ export class AuthComponent implements OnInit {
   showPassword = false;
   isLoginMode = true;
   isLoading = false;
+  serverError: string | null = null;
 
-  constructor(private fb: FormBuilder) {
+
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.authForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
@@ -31,6 +39,10 @@ export class AuthComponent implements OnInit {
 
   ngOnInit(): void {
     this.updateFormFields();
+
+    if (this.authService.isLoggedIn) {
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   updateFormFields(): void {
@@ -73,6 +85,7 @@ export class AuthComponent implements OnInit {
     this.isLoginMode = !this.isLoginMode;
     this.updateFormFields();
     this.authForm.reset();
+    this.serverError = null;
   }
 
   togglePasswordVisibility() {
@@ -91,12 +104,21 @@ export class AuthComponent implements OnInit {
     return strength;
   }
 
+  getInputClasses(controlName: string): string {
+    const control = this.authForm.get(controlName);
+    const isInvalid = control?.invalid && control?.touched;
+
+    const baseClasses = 'w-full border p-2 rounded transition-all duration-200 outline-none';
+    const validClasses = 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
+    const invalidClasses = 'border-red-500 focus:ring-2 focus:ring-red-500 focus:border-red-500';
+
+    return `${baseClasses} ${isInvalid ? invalidClasses : validClasses}`;
+  }
+
   onBlur(controlName: string): void {
     const control = this.authForm.get(controlName);
     if (control) {
       control.markAsTouched();
-    } else {
-      console.log('noob');
     }
   }
 
@@ -105,7 +127,9 @@ export class AuthComponent implements OnInit {
       this.authForm.markAllAsTouched();
       return;
     }
+
     this.isLoading = true;
+    this.serverError = null;
     const formData = this.authForm.value;
 
     if (this.isLoginMode) {
@@ -114,9 +138,16 @@ export class AuthComponent implements OnInit {
         password: formData.password,
         rememberMe: formData.rememberMe
       };
-      console.log('Login with:', loginData);
-
-      // call service
+      this.authService.login(loginData).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.router.navigate(['/dashboard']);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.serverError = error.message;
+        }
+      });
     }
     else {
       const registerData = {
@@ -124,11 +155,17 @@ export class AuthComponent implements OnInit {
         email: formData.email,
         password: formData.password
       };
-      console.log('Register with:', registerData);
 
-      // Call your auth service register method here
+      this.authService.register(registerData).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.router.navigate(['/dashboard']);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.serverError = error.message;
+        }
+      });
     }
-
-    this.isLoading = false;
   }
 }
