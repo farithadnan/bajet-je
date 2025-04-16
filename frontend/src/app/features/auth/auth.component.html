@@ -15,14 +15,12 @@
             (blur)="onBlur('username')"
             [appAutofocus]="!isLoginMode"
             [ngClass]="
-              {'focus:ring-blue-500 focus:border-blue-500': !(authForm.get('username')?.invalid && authForm.get('usernam')?.touched),
-              'focus:ring-red-500 focus:border-red-500' : authForm.get('username')?.invalid && authForm.get('username')?.dirty
-              }
-            "
+              {'focus:ring-red-500 focus:border-red-500' : authForm.get('username')?.invalid && authForm.get('username')?.dirty}"
             class="
               w-full border p-2 rounded
               transition-all duration-200
               focus:ring-2 outline-none
+              focus:ring-blue-500 focus:border-blue-500
             "
           />
           <ng-container *ngIf="authForm.get('username')?.invalid && authForm.get('username')?.dirty">
@@ -45,14 +43,12 @@
           (blur)="onBlur('email')"
           [appAutofocus]="isLoginMode"
           [ngClass]="
-            {'focus:ring-blue-500 focus:border-blue-500': !(authForm.get('email')?.invalid && authForm.get('email')?.touched),
-             'focus:ring-red-500 focus:border-red-500' : authForm.get('email')?.invalid && authForm.get('email')?.dirty
-            }
-          "
+            {'focus:ring-red-500 focus:border-red-500' : authForm.get('email')?.invalid && authForm.get('email')?.dirty}"
           class="
             w-full border p-2 rounded
             transition-all duration-200
             outline-none focus:ring-2
+            focus:ring-blue-500 focus:border-blue-500
           "
         />
         <ng-container *ngIf="authForm.get('email')?.invalid && authForm.get('email')?.dirty">
@@ -72,11 +68,7 @@
           (blur)="onBlur('password')"
           [type]="showPassword ? 'text' : 'password'"
           [attr.autocomplete]="isLoginMode ? 'current-password' : 'new-password'"
-          [ngClass]="
-            {'focus:ring-blue-500 focus:border-blue-500': !(authForm.get('password')?.invalid && authForm.get('password')?.touched),
-             'focus:ring-red-500 focus:border-red-500' : authForm.get('password')?.invalid && authForm.get('password')?.dirty
-            }
-          "
+          [ngClass]="{'focus:ring-red-500 focus:border-red-500' : authForm.get('password')?.invalid && authForm.get('password')?.dirty}"
           class="
             w-full border p-2 rounded
             transition-all duration-200
