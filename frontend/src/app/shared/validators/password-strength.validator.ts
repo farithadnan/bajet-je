@@ -3,6 +3,10 @@ import { AbstractControl, ValidationErrors } from "@angular/forms";
 export function passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.value;
 
+  if (!password) {
+    return { required: true }
+  }
+
   const hasUpperCase = /[A-Z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
   const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
