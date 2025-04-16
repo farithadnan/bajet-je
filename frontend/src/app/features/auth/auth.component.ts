@@ -17,7 +17,7 @@ import { passwordStrengthValidator } from '../../shared/validators/password-stre
 })
 export class AuthComponent implements OnInit {
   authForm: FormGroup;
-  showPassword = true;
+  showPassword = false;
   isLoginMode = true;
   isLoading = false;
 
