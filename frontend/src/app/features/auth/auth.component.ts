@@ -146,7 +146,7 @@ export class AuthComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
-          this.toastService.show('error', 'Login failed');
+          this.toastService.show('error', 'Login failed', error.message);
         }
       });
     }
@@ -166,7 +166,7 @@ export class AuthComponent implements OnInit {
         error: (error) => {
           this.isLoading = false;
           console.error(error);
-          this.toastService.show('error', 'Register failed');
+          this.toastService.show('error', 'Register failed', error.message);
         }
       });
     }
