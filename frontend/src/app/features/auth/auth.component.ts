@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { AutoFocusDirective } from '../../shared/directives/autofocus.directive';
 import { passwordStrengthValidator } from '../../shared/validators/password-strength.validator';
 import { AuthService } from '../../shared/services/auth.service';
+import { ToastService } from '../../shared/services/toastr.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -28,6 +29,7 @@ export class AuthComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private toastService: ToastService,
     private router: Router
   ) {
     this.authForm = this.fb.group({
@@ -141,11 +143,13 @@ export class AuthComponent implements OnInit {
       this.authService.login(loginData).subscribe({
         next: (response) => {
           this.isLoading = false;
+          this.toastService.show('success', 'Login successful');
           this.router.navigate(['/dashboard']);
         },
         error: (error) => {
           this.isLoading = false;
           this.serverError = error.message;
+          this.toastService.show('error', 'Login failed');
         }
       });
     }
@@ -159,11 +163,13 @@ export class AuthComponent implements OnInit {
       this.authService.register(registerData).subscribe({
         next: (response) => {
           this.isLoading = false;
+          this.toastService.show('success', 'Account created successfully');
           this.router.navigate(['/dashboard']);
         },
         error: (error) => {
           this.isLoading = false;
           this.serverError = error.message;
+          this.toastService.show('error', 'Register failed');
         }
       });
     }
