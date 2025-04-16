@@ -47,7 +47,17 @@ export class AuthService {
     const storedToken = localStorage.getItem('accessToken');
     if (storedToken) {
       this.accessToken = storedToken;
-      // We'll check the token validity when needed, not in constructor
+
+      // Try to get user data from localStorage
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          this.currentUserSubject.next(userData);
+        } catch (e) {
+          console.error('Error parsing stored user data', e);
+        }
+      }
     }
   }
 
@@ -57,6 +67,7 @@ export class AuthService {
       this.getCurrentUser().subscribe({
         next: (response) => {
           this.currentUserSubject.next(response.user);
+          localStorage.setItem('currentUser', JSON.stringify(response.user));
         },
         error: () => {
           // If getting current user fails, clear any stale data
@@ -70,6 +81,7 @@ export class AuthService {
     this.accessToken = null;
     this.currentUserSubject.next(null);
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('currentUser');
   }
 
   login(loginData: LoginData): Observable<AuthResponse> {
@@ -79,6 +91,7 @@ export class AuthService {
           this.accessToken = response.accessToken;
           this.currentUserSubject.next(response.user);
           localStorage.setItem('accessToken', response.accessToken);
+          localStorage.setItem('currentUser', JSON.stringify(response.user));
         }),
         catchError(this.handleError)
       );
@@ -91,6 +104,7 @@ export class AuthService {
           this.accessToken = response.accessToken;
           this.currentUserSubject.next(response.user);
           localStorage.setItem('accessToken', response.accessToken);
+          localStorage.setItem('currentUser', JSON.stringify(response.user));
         }),
         catchError(this.handleError)
       );
