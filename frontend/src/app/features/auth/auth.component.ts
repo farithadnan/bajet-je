@@ -23,7 +23,6 @@ export class AuthComponent implements OnInit {
   showPassword = false;
   isLoginMode = true;
   isLoading = false;
-  serverError: string | null = null;
 
 
   constructor(
@@ -88,7 +87,6 @@ export class AuthComponent implements OnInit {
     this.isLoginMode = !this.isLoginMode;
     this.updateFormFields();
     this.authForm.reset();
-    this.serverError = null;
   }
 
   togglePasswordVisibility() {
@@ -132,7 +130,6 @@ export class AuthComponent implements OnInit {
     }
 
     this.isLoading = true;
-    this.serverError = null;
     const formData = this.authForm.value;
 
     if (this.isLoginMode) {
@@ -149,7 +146,6 @@ export class AuthComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
-          this.serverError = error.message;
           this.toastService.show('error', 'Login failed');
         }
       });
@@ -169,7 +165,7 @@ export class AuthComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
-          this.serverError = error.message;
+          console.error(error);
           this.toastService.show('error', 'Register failed');
         }
       });
