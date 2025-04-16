@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AutoFocusDirective } from '../../shared/directives/autofocus.directive';
-import { passwordStrengthValidator } from '../../shared/directives/validators/password-strength.validator';
+import { passwordStrengthValidator } from '../../shared/validators/password-strength.validator';
 
 @Component({
   selector: 'app-auth',
