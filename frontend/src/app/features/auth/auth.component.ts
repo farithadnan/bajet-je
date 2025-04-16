@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AutoFocusDirective } from '../../shared/directives/autofocus.directive';
+import { passwordStrengthValidator } from '../../shared/directives/validators/password-strength.validator';
 
 @Component({
   selector: 'app-auth',
@@ -35,6 +36,19 @@ export class AuthComponent implements OnInit {
   updateFormFields(): void {
     const hasUsername = this.authForm.contains('username');
     const hasRememberMe = this.authForm.contains('rememberMe');
+    const passwordControl = this.authForm.get('password');
+
+    if (passwordControl) {
+      const baseValidators = [Validators.required, Validators.minLength(8)];
+
+      if (!this.isLoginMode) {
+        passwordControl.setValidators([...baseValidators, passwordStrengthValidator]);
+      } else {
+        passwordControl.setValidators(baseValidators);
+      }
+
+      passwordControl.updateValueAndValidity();
+    }
 
     if (!this.isLoginMode && !hasUsername) {
       this.authForm.addControl('username', this.fb.control('', [
@@ -63,6 +77,18 @@ export class AuthComponent implements OnInit {
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
+  }
+
+  getPasswordStrength(): number {
+    const password = this.authForm.get('password')?.value || '';
+    let strength = 0;
+
+    if (password.length >= 8) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+
+    return strength;
   }
 
   onBlur(controlName: string): void {
