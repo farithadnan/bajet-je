@@ -18,6 +18,7 @@ export class AuthComponent implements OnInit {
   authForm: FormGroup;
   showPassword = true;
   isLoginMode = true;
+  isLoading = false;
 
   constructor(private fb: FormBuilder) {
     this.authForm = this.fb.group({
@@ -78,7 +79,7 @@ export class AuthComponent implements OnInit {
       this.authForm.markAllAsTouched();
       return;
     }
-
+    this.isLoading = true;
     const formData = this.authForm.value;
 
     if (this.isLoginMode) {
@@ -101,5 +102,7 @@ export class AuthComponent implements OnInit {
 
       // Call your auth service register method here
     }
+
+    this.isLoading = false;
   }
 }
