@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { environment } from "../../../environments/environment.prod";
-import { BehaviorSubject, catchError, Observable, tap, throwError } from "rxjs";
+import { BehaviorSubject, catchError, Observable, of, tap, throwError } from "rxjs";
 
 export interface User {
   _id: string;
@@ -40,14 +40,36 @@ export class AuthService {
   private accessToken: string | null = null;
 
   constructor(private http: HttpClient) {
-    this.getCurrentUser().subscribe({
-      next: (response) => {
-        this.currentUserSubject.next(response.user)
-      },
-      error: () => {
-        this.logout().subscribe();
-      }
-    });
+    this.loadStoredUserData();
+  }
+
+  private loadStoredUserData(): void {
+    const storedToken = localStorage.getItem('accessToken');
+    if (storedToken) {
+      this.accessToken = storedToken;
+      // We'll check the token validity when needed, not in constructor
+    }
+  }
+
+  initializeUserData(): void {
+    // Only try to get current user if we have a token
+    if (this.token) {
+      this.getCurrentUser().subscribe({
+        next: (response) => {
+          this.currentUserSubject.next(response.user);
+        },
+        error: () => {
+          // If getting current user fails, clear any stale data
+          this.clearAuthData();
+        }
+      });
+    }
+  }
+
+  private clearAuthData(): void {
+    this.accessToken = null;
+    this.currentUserSubject.next(null);
+    localStorage.removeItem('accessToken');
   }
 
   login(loginData: LoginData): Observable<AuthResponse> {
@@ -78,11 +100,12 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${this.apiUrl}/auth/logout`, {})
       .pipe(
         tap(() => {
-          this.accessToken = null;
-          this.currentUserSubject.next(null);
-          localStorage.removeItem('accessToken');
+          this.clearAuthData();
         }),
-        catchError(this.handleError)
+        catchError(error => {
+          this.clearAuthData();
+          return this.handleError(error);
+        })
       );
   }
 
@@ -98,8 +121,17 @@ export class AuthService {
   }
 
   getCurrentUser(): Observable<{ user: User }> {
+    // If we don't have a token, don't make the request
+    if (!this.token) {
+      return of({ user: null as any }).pipe(
+        catchError(this.handleError)
+      );
+    }
+
     return this.http.get<{ user: User }>(`${this.apiUrl}/auth/me`)
-      .pipe(catchError(this.handleError))
+      .pipe(
+        catchError(this.handleError)
+      );
   }
 
   changePassword(oldPassword: string, newPassword: string): Observable<{ message: string }> {
