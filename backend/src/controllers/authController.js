@@ -32,6 +32,7 @@ export const registerUser = async (req, res) => {
         await user.save();
 
         res.cookie("refreshToken", refreshToken, {
+            path: "/",
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
@@ -80,12 +81,13 @@ export const login = async (req, res) => {
       existingUser.refreshToken = refreshToken;
       await existingUser.save();
 
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: refreshTokenExpiry
-      });
+    res.cookie("refreshToken", refreshToken, {
+      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: refreshTokenExpiry
+    });
 
       res.json({
         message: "Login successful",
@@ -119,20 +121,34 @@ export const logout = async (req, res) => {
 
 export const refreshAccessToken = async (req, res) => {
     try {
-        const token = req.cookies.refreshToken;
-        if (!token) {
-            return res.sendStatus(401);
-        }
+      const token = req.cookies.refreshToken;
+      if (!token) {
+        return res.sendStatus(401);
+      }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.userId);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.userId);
 
-        if (!user || user.refreshToken !== token) {
-            return res.sendStatus(403);
-        }
+      if (!user || user.refreshToken !== token) {
+        return res.sendStatus(403);
+      }
 
-        const newAccessToken = generateAccessToken(user, process.env.JWT_SECRET);
-        res.json({ accessToken: newAccessToken });
+      const newAccessToken = generateAccessToken(user, process.env.JWT_SECRET);
+      const newRefreshToken = generateRefreshToken(user, process.env.JWT_SECRET);
+
+      user.refreshToken = newRefreshToken;
+      await user.save();
+
+      // Set new refresh token in cookie
+      res.cookie("refreshToken", newRefreshToken, {
+        path: "/",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      res.json({ accessToken: newAccessToken });
     }
     catch (error) {
         res.status(403).json({ message: "Session expired" });
