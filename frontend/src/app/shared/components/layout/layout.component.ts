@@ -24,6 +24,7 @@ export class LayoutComponent implements OnInit {
   @Input() pageTitle: string = 'Dashboard';
 
   sidebarOpen: boolean = false;
+  sidebarCollapsed: boolean = false;
   currentUser$: Observable<User | null>;
   currentYear: number = new Date().getFullYear();
 
@@ -84,6 +85,10 @@ export class LayoutComponent implements OnInit {
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  toggleSidebarCollapse(): void {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
   logout(): void {

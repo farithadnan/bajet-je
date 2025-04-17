@@ -2,36 +2,63 @@
   <!-- Sidebar (mobile responsive) -->
   <aside
     class="fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out md:relative md:translate-x-0"
-    [ngClass]="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}"
+    [ngClass]="{
+      'translate-x-0': sidebarOpen,
+      '-translate-x-full': !sidebarOpen && !sidebarCollapsed,
+      'md:translate-x-0': true,
+      'w-64': !sidebarCollapsed,
+      'w-16': sidebarCollapsed
+    }"
   >
 
-    <!-- Logo and close button -->
-    <div class="flex items-center justify-between p-4 border-b">
-      <div class="flex items-center space-x-2">
-        <span class="text-xl font-bold text-blue-600">Bajet-Je</span>
+    <!-- Logo and toggle button -->
+    <div class="flex items-center justify-between p-4 border-b border-gray-200 mb-3 mt-1">
+      <div class="logo-container flex items-center" [ngClass]="{'justify-center w-full': sidebarCollapsed}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+        </svg>
+        <span class="logo-text text-xl font-bold text-blue-600 ml-2">Bajet-Je</span>
       </div>
-      <button class="p-1 rounded-md hover:bg-gray-200 md:hidden" (click)="toggleSidebar()">
+      <button *ngIf="!sidebarCollapsed" class="p-1 rounded-md hover:bg-gray-200 md:hidden" (click)="toggleSidebar()">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
     </div>
 
+    <!-- Collapse/Expand button (visible only on desktop) -->
+    <button
+      class="hidden md:flex absolute -right-3 top-16 bg-white border border-gray-200 rounded-full p-1 shadow-md hover:bg-gray-100"
+      (click)="toggleSidebarCollapse()">
+      <svg *ngIf="!sidebarCollapsed" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+      </svg>
+      <svg *ngIf="sidebarCollapsed" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+      </svg>
+    </button>
+
     <!-- Navigation Links -->
     <nav class="p-4 space-y-2">
       <a *ngFor="let item of navigationItems" [routerLink]="item.route" routerLinkActive="bg-blue-100 text-blue-600"
-        class="flex items-center p-2 rounded-md hover:bg-blue-50 transition-colors">
-        <span class="mr-3">
+        class="flex items-center p-2 rounded-md hover:bg-blue-50 transition-colors"
+        [ngClass]="{'justify-center': sidebarCollapsed}">
+        <span [ngClass]="{'mr-3': !sidebarCollapsed}">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon" />
           </svg>
         </span>
-        <span>{{ item.label }}</span>
+        <span *ngIf="!sidebarCollapsed" class="menu-label">{{ item.label }}</span>
+        <span *ngIf="sidebarCollapsed" class="sr-only">{{ item.label }}</span>
       </a>
     </nav>
 
-    <!-- User Profile Section -->
-    <div class="absolute bottom-0 left-0 right-0 p-4 border-t">
+    <!-- User Profile Section (hidden when collapsed) -->
+    <div *ngIf="!sidebarCollapsed" class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
       <div *ngIf="currentUser$ | async as user" class="flex items-center space-x-3">
         <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
           {{ user.username!.charAt(0)!.toUpperCase() || 'U' }}
@@ -41,6 +68,23 @@
           <p class="text-xs text-gray-500 truncate">{{ user.email }}</p>
         </div>
         <button (click)="logout()" class="p-1 rounded-md hover:bg-gray-200" title="Logout">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- User Icon Only (visible when collapsed) -->
+    <div *ngIf="sidebarCollapsed && (currentUser$ | async) as user"
+      class="absolute bottom-0 left-0 right-0 p-4 border-t flex justify-center">
+      <div class="flex flex-col items-center">
+        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+          {{ user.username!.charAt(0)!.toUpperCase() || 'U' }}
+        </div>
+        <button (click)="logout()" class="mt-2 p-1 rounded-md hover:bg-gray-200" title="Logout">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
