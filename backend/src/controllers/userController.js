@@ -6,6 +6,9 @@ export const getAllUsers = async (req, res) => {
         // Return all users
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
+        const search = req.query.search;
+        const role = req.query.role;
+        const status = req.query.status === "true"; 
 
         const users = await User.find()
             .skip((page - 1) * limit)
