@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { filter, map, mergeMap, Observable } from 'rxjs';
-import { AuthService, User } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 import { ActivatedRoute, NavigationEnd, Router, RouterModule } from '@angular/router';
 import { ToastService } from '../../services/toastr.service';
+import { SafeUser } from '../../../core/models/user.model';
 
 interface NavigationItem {
   label: string;
@@ -26,7 +27,7 @@ export class LayoutComponent implements OnInit {
 
   sidebarOpen: boolean = false;
   sidebarCollapsed: boolean = false;
-  currentUser$: Observable<User | null>;
+  currentUser$: Observable<SafeUser | null>;
   currentYear: number = new Date().getFullYear();
 
   navigationItems: NavigationItem[] = [
