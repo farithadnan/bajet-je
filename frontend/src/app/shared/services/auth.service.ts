@@ -2,19 +2,12 @@ import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { environment } from "../../../environments/environment.prod";
 import { BehaviorSubject, catchError, Observable, of, tap, throwError } from "rxjs";
-
-export interface User {
-  _id: string;
-  username: string;
-  email: string;
-  isActive: boolean;
-  role?: string;
-}
-
+import { SafeUser } from "../../core/models/user.model";
+import { UtilsService } from "./utils.services";
 export interface AuthResponse {
   message: string;
   accessToken: string;
-  user: User;
+  user: SafeUser;
   logout?: boolean;
 }
 
@@ -35,11 +28,11 @@ export interface RegisterData {
 })
 export class AuthService {
   private apiUrl = environment.apiBaseUrl;
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  private currentUserSubject = new BehaviorSubject<SafeUser | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private accessToken: string | null = null;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private util: UtilsService) {
     this.loadStoredUserData();
   }
 
@@ -93,7 +86,7 @@ export class AuthService {
           localStorage.setItem('accessToken', response.accessToken);
           localStorage.setItem('currentUser', JSON.stringify(response.user));
         }),
-        catchError(this.handleError)
+        catchError(this.util.handleError)
       );
   }
 
@@ -106,7 +99,7 @@ export class AuthService {
           localStorage.setItem('accessToken', response.accessToken);
           localStorage.setItem('currentUser', JSON.stringify(response.user));
         }),
-        catchError(this.handleError)
+        catchError(this.util.handleError)
       );
   }
 
@@ -118,7 +111,7 @@ export class AuthService {
         }),
         catchError(error => {
           this.clearAuthData();
-          return this.handleError(error);
+          return this.util.handleError(error);
         })
       );
   }
@@ -132,23 +125,23 @@ export class AuthService {
           this.accessToken = response.accessToken;
           localStorage.setItem('accessToken', response.accessToken);
         }),
-        catchError(this.handleError)
+        catchError(this.util.handleError)
       );
   }
 
-  getCurrentUser(): Observable<{ user: User }> {
+  getCurrentUser(): Observable<{ user: SafeUser }> {
     // If we don't have a token, don't make the request
     if (!this.token) {
       return of({ user: null as any }).pipe(
-        catchError(this.handleError)
+        catchError(this.util.handleError)
       );
     }
 
-    return this.http.get<{ user: User }>(`${this.apiUrl}/auth/me`, {
+    return this.http.get<{ user: SafeUser }>(`${this.apiUrl}/auth/me`, {
       withCredentials: true
     })
       .pipe(
-        catchError(this.handleError)
+        catchError(this.util.handleError)
       );
   }
 
@@ -159,7 +152,7 @@ export class AuthService {
       },
       { withCredentials: true}
     ).pipe(
-      catchError(this.handleError)
+      catchError(this.util.handleError)
     );
   }
 
@@ -167,25 +160,11 @@ export class AuthService {
     return !!this.currentUserSubject.value;
   }
 
-  get currentUserValue(): User | null {
+  get currentUserValue(): SafeUser | null {
     return this.currentUserSubject.value;
   }
 
   get token(): string | null {
     return this.accessToken || localStorage.getItem('accessToken');
-  }
-
-  private handleError(error: HttpErrorResponse) {
-    let errorMessage = 'An unknown error occurred';
-
-    if (error.error instanceof ErrorEvent) {
-      // Client-side error
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      // Server-side error
-      errorMessage = error.error?.message || `Error Code: ${error.status}, Message: ${error.message}`;
-    }
-
-    return throwError(() => new Error(errorMessage));
   }
 }
