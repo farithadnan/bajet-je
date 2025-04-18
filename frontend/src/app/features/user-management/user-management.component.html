@@ -1,3 +1,13 @@
+<div *ngIf="loading" class="flex justify-center my-4">
+  <div>Loading...</div>
+</div>
+
+<!-- Error message -->
+<!-- <div *ngIf="error" class="bg-red-100 text-red-700 p-4 rounded mb-4">
+  {{ error }}
+</div> -->
+
+
 <div class="max-w-full mx-auto p-4">
   <div class="bg-white p-6 shadow-md rounded-lg">
     <!-- Search & filter field -->
@@ -63,11 +73,6 @@
       <table class="w-full text-sm text-left rtl:text-right">
         <thead class="bg-blue-400 uppercase text-white">
           <tr>
-            <th scope="col" class="p-4 md:table-cell">
-              <div class="flex item-center">
-                <input type="checkbox" class="w-4 h-4 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-              </div>
-            </th>
             <th scope="col" class="px-6 py-3">User</th>
             <th scope="col" class="px-6 py-3">Email</th>
             <th scope="col" class="px-6 py-3">Role</th>
@@ -77,23 +82,52 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
-            <td class="w-4 p-4">
+          <tr *ngFor="let user of users" class="bg-white border-b border-gray-200 hover:bg-gray-50">
+            <!-- Username -->
+            <td scope="row" class="px-6 py-4">
               <div class="flex items-center">
-                <input type="checkbox" class="w-4 h-4 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+                  {{ user.username.charAt(0).toUpperCase() }}
+                </div>
+                <span class="font-medium">{{ user.username }}</span>
               </div>
             </td>
+
+            <!-- Email -->
             <td scope="row" class="px-6 py-4">
-              Holl
+              {{ user.email }}
             </td>
+
+            <!-- Role -->
             <td scope="row" class="px-6 py-4">
-              Holla.com
+              <span [ngClass]="user.role === 'admin'
+                    ? 'bg-purple-100 text-purple-800'
+                    : 'bg-blue-100 text-blue-800'" class="px-3 py-1 rounded-full text-xs font-medium">
+                {{ user.role === 'admin' ? 'Admin' : 'User' }}
+              </span>
             </td>
+
+            <!-- Status -->
             <td scope="row" class="px-6 py-4">
-              Admins
+              <span [ngClass]="user.status
+                ? 'bg-green-100 text-green-800'
+                : 'bg-red-100 text-red-800'"
+                class="px-3 py-1 rounded-full text-xs font-medium">
+                {{ user.status ? 'Active' : 'Inactive' }}
+              </span>
             </td>
-            <td scope="row" class="px-6 py-4">Active</td>
-            <td scope="row" class="px-6 py-4 hidden lg:table-cell">Yesterday</td>
+
+            <!-- Last login -->
+            <td scope="row" class="px-6 py-4 hidden lg:table-cell">
+              <ng-container *ngIf="user.lastLogin; else never">
+                {{ user.lastLogin | date: 'EEE, MMM d, yyyy, h:mm a' }}
+              </ng-container>
+              <ng-template #never>
+                <span class="text-gray-400 italic">Never</span>
+              </ng-template>
+            </td>
+
+            <!-- Action buttons -->
             <td scope="row" class="px-6 py-4 text-right">
               <div class="flex justify-end space-x-1">
                 <button title="Edit User" class="bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white p-2 rounded-lg">
@@ -109,6 +143,14 @@
                   </svg>
                 </button>
               </div>
+            </td>
+
+          </tr>
+
+          <!-- No users found message -->
+          <tr *ngIf="users.length === 0 && !loading" class="bg-white">
+            <td colspan="7" class="px-6 py-8 text-center text-gray-600">
+              No users found
             </td>
           </tr>
 
