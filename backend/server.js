@@ -5,10 +5,10 @@ import express from "express";
 import mongoose from "mongoose";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
-import authRoutes from "../src/routes/authRoutes.js";
-import userRoutes from "../src/routes/userRoutes.js";
-import budgetTemplateRoutes from "../src/routes/budgetTemplateRoutes.js";
-import monthlyBudgetRoutes from "../src/routes/monthlyBudgetRoutes.js";
+import authRoutes from "../backend/src/routes/authRoutes.js";
+import userRoutes from "../backend/src/routes/userRoutes.js";
+import budgetTemplateRoutes from "../backend/src/routes/budgetTemplateRoutes.js";
+import monthlyBudgetRoutes from "../backend/src/routes/monthlyBudgetRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
