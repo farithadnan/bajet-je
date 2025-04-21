@@ -4,15 +4,88 @@ import { TableQueryFilter, UserService } from '../../shared/services/user.servic
 import { User } from '../../core/models/user.model';
 import { ToastService } from '../../shared/services/toastr.service';
 import { FormsModule } from '@angular/forms';
+import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
 
 @Component({
   selector: 'app-user-management',
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DataTableComponent
+  ],
   standalone: true,
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.css'
 })
 export class UserManagementComponent implements OnInit {
+  tableColumns: TableColumn[] = [
+    {
+      header: 'User',
+      field: 'username',
+      type: 'avatar'
+    },
+    {
+      header: 'Email',
+      field: 'email',
+      type: 'text'
+    },
+    {
+      header: 'Role',
+      field: 'role',
+      type: 'badge',
+      badgeConfig: {
+        field: 'role',
+        conditions: [
+          {
+            value: 'admin',
+            bgClass: 'bg-purple-100',
+            textClass: 'text-purple-800',
+            display: 'Admin'
+          },
+          {
+            value: 'user',
+            bgClass: 'bg-blue-100',
+            textClass: 'text-blue-800',
+            display: 'User'
+          }
+        ]
+      }
+    },
+    {
+      header: 'Status',
+      field: 'status',
+      type: 'badge',
+      badgeConfig: {
+        field: 'status',
+        conditions: [
+          {
+            value: true,
+            bgClass: 'bg-green-100',
+            textClass: 'text-green-800',
+            display: 'Active'
+          },
+          {
+            value: false,
+            bgClass: 'bg-red-100',
+            textClass: 'text-red-800',
+            display: 'Inactive'
+          }
+        ]
+      }
+    },
+    {
+      header: 'Last Login',
+      field: 'lastLogin',
+      type: 'date',
+      hidden: true
+    },
+    {
+      header: 'Actions',
+      field: '',
+      type: 'actions'
+    }
+  ];
+
   users: User[] = [];
   totalUsers: number = 0;
   currentPage: number = 1;
@@ -74,15 +147,28 @@ export class UserManagementComponent implements OnInit {
     this.loadUsers();
   }
 
-  // Reset filters
-  resetFilters() {
-    this.tableData = {
-      page: 1,
-      limit: 10,
-      search: '',
-      role: 'all'
-    };
-    this.loadUsers();
+  // Add handler for row actions
+  handleUserAction(event: { action: string, item: any }): void {
+    const { action, item } = event;
+
+    if (action === 'edit') {
+      // Handle edit user
+      this.editUser(item);
+    } else if (action === 'delete') {
+      // Handle delete user
+      this.deleteUser(item);
+    }
+  }
+
+  // Implement these methods according to your requirements
+  editUser(user: any): void {
+    console.log('Edit user:', user);
+    // Implement edit functionality
+  }
+
+  deleteUser(user: any): void {
+    console.log('Delete user:', user);
+    // Implement delete functionality
   }
 
   // Page change handler
@@ -91,40 +177,4 @@ export class UserManagementComponent implements OnInit {
     this.tableData.page = page;
     this.loadUsers();
   }
-
-  pageNumbers(): number[] {
-    if (!this.totalPages) return [1];
-
-    const current  = this.currentPage;
-    const last = this.totalPages;
-    const count = 1;
-    const left = current - count;
-    const right = current + count +1;
-    const range = [];
-    const rangeWithDots = [];
-    let list;
-
-    for (let i = 1; i <= last; i++) {
-      if (i == 1 || i === last || (i >= left && i < right)) {
-        range.push(i);
-      }
-    }
-
-
-    for (const i of range) {
-      if (list) {
-        if (i - list === 2) {
-          rangeWithDots.push(list + 1);
-        } else if (i - list !== 1) {
-          rangeWithDots.push(-1);
-        }
-      }
-      rangeWithDots.push(i);
-      list = i;
-    }
-
-    return rangeWithDots;
-
-  }
-
 }
