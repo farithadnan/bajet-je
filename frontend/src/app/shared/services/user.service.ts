@@ -41,13 +41,13 @@ export class UserService {
   getAllUsers(tableData: TableQueryFilter): Observable<GetAllUsersResponse> {
     let params = new HttpParams()
       .set('page', tableData.page?.toString() || '1')
-      .set('limit', tableData.limit?.toString() || '0');
+      .set('limit', tableData.limit?.toString() || '10');
 
-    if (tableData.search) {
-      params = params.set('search', tableData.search);
+    if (tableData.search && tableData.search.trim() !== '') {
+      params = params.set('search', tableData.search.trim());
     }
 
-    if (tableData.role) {
+    if (tableData.role && tableData.role !== 'all') {
       params = params.set('role', tableData.role);
     }
 
@@ -55,6 +55,12 @@ export class UserService {
       params = params.set('status', tableData.status.toString());
     }
 
+    if (tableData.sortBy) {
+      params = params.set('sortBy', tableData.sortBy);
+      if (tableData.sortOrder) {
+        params = params.set('sortOrder', tableData.sortOrder);
+      }
+    }
 
     return this.http.get<GetAllUsersResponse>(`${this.apiUrl}/users`, {
       params,
