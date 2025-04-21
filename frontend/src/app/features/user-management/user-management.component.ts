@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { TableQueryFilter, UserService } from '../../shared/services/user.service';
-import { User } from '../../core/models/user.model';
+import { SafeUser, User } from '../../core/models/user.model';
 import { ToastService } from '../../shared/services/toastr.service';
 import { FormsModule } from '@angular/forms';
 import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
+import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
   selector: 'app-user-management',
@@ -85,6 +86,7 @@ export class UserManagementComponent implements OnInit {
       type: 'actions'
     }
   ];
+  currentUser!: SafeUser;
 
   users: User[] = [];
   totalUsers: number = 0;
@@ -103,12 +105,38 @@ export class UserManagementComponent implements OnInit {
 
   constructor(
     private userService: UserService,
+    private authService: AuthService,
     private toast: ToastService
   ) {}
 
   ngOnInit(): void {
-    this.loadUsers();
-  }
+    this.authService.getCurrentUser().subscribe(({ user }: { user: SafeUser }) => {
+      this.currentUser = user;
+
+      // Find the actions column and configure it
+      const actionsColumn = this.tableColumns.find(col => col.type === 'actions');
+      if (actionsColumn) {
+        actionsColumn.actionConfig = {
+          buttons: ['edit', 'delete'], // Only show these buttons
+          disableConditions: {
+            // Disable delete button for own user
+            delete: (item: any, contextData: any) => {
+              return item._id === contextData?._id; // Can't delete yourself
+            },
+            // Example: disable edit for admin users if current user is not admin
+            // edit: (item: any, contextData: any) => {
+            //   return item.role === 'admin' && contextData?.role !== 'admin';
+            // }
+          },
+          disabledTooltips: {
+            delete: "You cannot delete your own account",
+            edit: "You don't have permission to edit admin users"
+          }
+        };
+      }
+
+      this.loadUsers();
+    });  }
 
   loadUsers(): void {
     this.loading = true;
@@ -161,14 +189,27 @@ export class UserManagementComponent implements OnInit {
   }
 
   // Implement these methods according to your requirements
-  editUser(user: any): void {
+  editUser(user: User): void {
     console.log('Edit user:', user);
     // Implement edit functionality
   }
 
-  deleteUser(user: any): void {
-    console.log('Delete user:', user);
-    // Implement delete functionality
+  deleteUser(user: User): void {
+    if (!confirm(`Are you sure you want to delete user "${user.username}?"`)) {
+      return;
+    }
+
+    this.loading = true;
+    this.userService.deleteUser(user._id).subscribe({
+      next: (response) => {
+        this.toast.show('success', response.message || 'User deleted successfully');
+        this.loadUsers();
+      },
+      error: (error) => {
+        this.loading = false;
+        this.toast.show('error', error.message || 'Failed to delete user');
+      }
+    });
   }
 
   // Page change handler

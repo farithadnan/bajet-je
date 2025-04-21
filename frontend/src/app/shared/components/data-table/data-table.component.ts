@@ -19,6 +19,25 @@ export interface TableColumn {
     }[];
   };
   dateFormat?: string; // For date type columns
+  actionConfig?: {
+    // Define which buttons to show (default is all)
+    buttons?: ('edit' | 'delete' | 'view')[];
+
+    // Custom disable conditions for each button
+    disableConditions?: {
+      // Function takes the row item and context data, returns true if button should be disabled
+      edit?: (item: any, contextData?: any) => boolean;
+      delete?: (item: any, contextData?: any) => boolean;
+      view?: (item: any, contextData?: any) => boolean;
+    };
+
+    // Custom tooltip messages when buttons are disabled
+    disabledTooltips?: {
+      edit?: string;
+      delete?: string;
+      view?: string;
+    };
+  };
 }
 
 @Component({
@@ -34,6 +53,8 @@ export class DataTableComponent implements OnChanges {
   @Input() columns: TableColumn[] = [];
   @Input() loading: boolean = false;
   @Input() emptyMessage: string = 'No data found';
+
+  @Input() contextData: any = null;
 
   // Pagination inputs
   @Input() totalItems: number = 0;
@@ -99,6 +120,39 @@ export class DataTableComponent implements OnChanges {
 
     const condition = badgeConfig.conditions.find(c => c.value === item[badgeConfig.field]);
     return condition?.display || '';
+  }
+
+  // Check if a specific action button should be shown
+  isActionVisible(col: TableColumn, actionType: string): boolean {
+    if (!col.actionConfig || !col.actionConfig.buttons) {
+      // Default behavior: show all buttons if not configured
+      return true;
+    }
+
+    return col.actionConfig.buttons.includes(actionType as any);
+  }
+
+  // Check if a specific action button should be disabled
+  isActionDisabled(item: any, col: TableColumn, actionType: 'edit' | 'delete' | 'view'): boolean {
+    if (!col.actionConfig || !col.actionConfig.disableConditions) {
+      return false; // Default: not disabled
+    }
+
+    const disableCondition = col.actionConfig.disableConditions[actionType];
+    if (disableCondition) {
+      return disableCondition(item, this.contextData);
+    }
+
+    return false;
+  }
+
+  // Get tooltip for disabled buttons
+  getDisabledTooltip(col: TableColumn, actionType: 'edit' | 'delete' | 'view'): string {
+    if (!col.actionConfig || !col.actionConfig.disabledTooltips) {
+      return `Cannot ${actionType}`; // Default tooltip
+    }
+
+    return col.actionConfig.disabledTooltips[actionType] || `Cannot ${actionType}`;
   }
 
   // Generate pagination numbers with ellipsis

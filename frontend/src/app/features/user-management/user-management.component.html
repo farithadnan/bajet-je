@@ -82,6 +82,7 @@
     <app-data-table
       [data]="users"
       [columns]="tableColumns"
+      [contextData]="currentUser"
       [loading]="loading"
       [emptyMessage]="'No users found'"
       [totalItems]="totalUsers"

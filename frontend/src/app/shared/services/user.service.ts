@@ -25,7 +25,7 @@ export interface GetAllUsersResponse {
 
 export interface UserResponse {
   message: string,
-  user: SafeUser
+  user?: SafeUser
 }
 
 
@@ -69,5 +69,14 @@ export class UserService {
     .pipe(
       catchError(this.util.handleError)
     )
+  }
+
+  deleteUser(id: string): Observable<UserResponse> {
+    return this.http.delete<UserResponse>(`${this.apiUrl}/users/${id}`, {
+      withCredentials: true
+    })
+      .pipe(
+        catchError(this.util.handleError)
+      );
   }
 }
