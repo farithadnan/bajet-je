@@ -12,6 +12,11 @@ export const routes: Routes = [
   },
   {
     path: '',
+    redirectTo: 'dashboard',
+    pathMatch: 'full'
+  },
+  {
+    path: '',
     component: LayoutComponent,
     canActivate: [AuthGuard],
     children: [
@@ -28,12 +33,7 @@ export const routes: Routes = [
     ]
   },
   {
-    path: '',
-    redirectTo: 'dashboard',
-    pathMatch: 'full'
-  },
-  {
-    path: '*',
+    path: '**',
     redirectTo: 'dashboard'
   }
 ];
