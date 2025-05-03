@@ -189,6 +189,8 @@ export class UserManagementComponent implements OnInit {
   searchUsers() {
     this.tableData.page = 1;
 
+    delete this.tableData.status;
+
     if (this.tableData.role === 'active') {
       this.tableData.status = true;
       this.tableData.role = 'all';
