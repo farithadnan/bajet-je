@@ -63,6 +63,63 @@ export const getUserById = async (req, res) => {
     }
 };
 
+export const createUser = async (req, res) => {
+  try {
+    const token = req.cookies.refreshToken;
+    if (!token) {
+      return res.sendStatus(401);
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const currentUser = await User.findById(decoded.userId);
+
+    if (!currentUser) {
+      return res.sendStatus(403);
+    }
+    
+    const { username, email, password, role, active } = req.body;
+    
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "Username, email and password are required" });
+    }
+
+    const filter = {
+      $or: [
+        { username: username },
+        { email: email }
+      ]
+    };
+
+    const existingUser = await User.findOne(filter).lean();
+
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    const newUser = new User({
+      username: username,
+      email: email,
+      role: role || 'user',
+      active: active !== undefined ? active : true,
+      passwordHash,
+      createdBy: currentUser.username,
+    });
+
+    await newUser.save();
+
+    return res.status(201).json({
+      message: "User created successfully",
+      user: newUser.toSafeObject()
+    });
+  }
+  catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+}
+
 export const updateUser = async (req, res) => {
     try {
         const { username, email, role, status } = req.body;
