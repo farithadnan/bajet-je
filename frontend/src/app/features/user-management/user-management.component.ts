@@ -149,10 +149,9 @@ export class UserManagementComponent implements OnInit {
             delete: (item: any, contextData: any) => {
               return item._id === contextData?._id; // Can't delete yourself
             },
-            // Example: disable edit for admin users if current user is not admin
-            // edit: (item: any, contextData: any) => {
-            //   return item.role === 'admin' && contextData?.role !== 'admin';
-            // }
+            edit: (item: any, contextData: any) => {
+              return item.role === 'admin' && contextData?.role !== 'admin';
+            }
           },
           disabledTooltips: {
             delete: "You cannot delete your own account",
