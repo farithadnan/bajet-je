@@ -28,6 +28,20 @@ export interface UserResponse {
   user?: SafeUser
 }
 
+export interface CreateUserData {
+  username: string;
+  email: string;
+  password: string;
+  role?: string;
+}
+
+export interface UpdateUserData {
+  username?: string;
+  email?: string;
+  role?: string;
+  status?: boolean;
+}
+
 
 @Injectable({
   providedIn: "root"
@@ -69,6 +83,20 @@ export class UserService {
     .pipe(
       catchError(this.util.handleError)
     )
+  }
+
+  createUser(userData: CreateUserData): Observable<UserResponse> {
+    return this.http.post<UserResponse>(`${this.apiUrl}/users/create`, userData, { withCredentials: true})
+    .pipe(
+      catchError(this.util.handleError)
+    )
+  }
+
+  updateUser(id: string, userData: UpdateUserData): Observable<UserResponse> {
+    return this.http.post<UserResponse>(`${this.apiUrl}/users/${id}`, userData, { withCredentials: true})
+      .pipe(
+        catchError(this.util.handleError)
+      )
   }
 
   deleteUser(id: string): Observable<UserResponse> {
