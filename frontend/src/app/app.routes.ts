@@ -3,6 +3,7 @@ import { AuthComponent } from './features/auth/auth.component';
 import { LayoutComponent } from './shared/components/layout/layout.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { LoginGuard } from './core/guards/login.guard';
+import { AdminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -27,6 +28,7 @@ export const routes: Routes = [
       },
       {
         path: 'admin/users',
+        canActivate: [AuthGuard, AdminGuard],
         loadComponent: () => import('./features/user-management/user-management.component').then(m => m.UserManagementComponent),
         data: { title: 'User Management' }
       }

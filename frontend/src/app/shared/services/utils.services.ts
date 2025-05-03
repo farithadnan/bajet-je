@@ -12,12 +12,15 @@ export class UtilsService {
   public handleError(error: HttpErrorResponse) {
     let errorMessage = 'An unknown error occurred';
 
-    if (error.error instanceof ErrorEvent) {
+    if (error.status === 403) {
+      errorMessage = 'You do not have permission to perform this action';
+      // Optional: navigate to dashboard or show permission denied message
+    } else if (error.error instanceof ErrorEvent) {
       // Client-side error
-      errorMessage = `Error: ${error.error.message}`;
+      errorMessage = error.error.message;
     } else {
       // Server-side error
-      errorMessage = error.error?.message || `Error Code: ${error.status}, Message: ${error.message}`;
+      errorMessage = error.error?.message || `Error Code: ${error.status}`;
     }
 
     return throwError(() => new Error(errorMessage));

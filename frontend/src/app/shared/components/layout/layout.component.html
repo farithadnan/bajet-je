@@ -44,17 +44,19 @@
 
     <!-- Navigation Links -->
     <nav class="p-4 space-y-2">
-      <a *ngFor="let item of navigationItems" [routerLink]="item.route" routerLinkActive="bg-blue-100 text-blue-600"
-        class="flex items-center p-2 rounded-md hover:bg-blue-50 transition-colors"
-        [ngClass]="{'justify-center': sidebarCollapsed}">
-        <span [ngClass]="{'mr-3': !sidebarCollapsed}">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon" />
-          </svg>
-        </span>
-        <span *ngIf="!sidebarCollapsed" class="menu-label">{{ item.label }}</span>
-        <span *ngIf="sidebarCollapsed" class="sr-only">{{ item.label }}</span>
-      </a>
+      <ng-container *ngFor="let item of navigationItems" >
+        <a *ngIf="!(item.adminOnly) || ((currentUser$ | async)?.role === 'admin')" [routerLink]="item.route" routerLinkActive="bg-blue-100 text-blue-600"
+          class="flex items-center p-2 rounded-md hover:bg-blue-50 transition-colors"
+          [ngClass]="{'justify-center': sidebarCollapsed}">
+          <span [ngClass]="{'mr-3': !sidebarCollapsed}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon" />
+            </svg>
+          </span>
+          <span *ngIf="!sidebarCollapsed" class="menu-label">{{ item.label }}</span>
+          <span *ngIf="sidebarCollapsed" class="sr-only">{{ item.label }}</span>
+        </a>
+      </ng-container>
     </nav>
 
     <!-- User Profile Section (hidden when collapsed) -->
