@@ -6,27 +6,28 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div *ngIf="password" class="mt-2">
+    <div class="mt-2 w-full">
       <!-- Strength bars -->
-      <div class="flex space-x-1 mb-1">
-        <div class="h-1 flex-1 rounded" [ngClass]="{
+      <div class="grid grid-cols-4 gap-1 mb-1 w-full">
+        <div class="h-1 rounded" [ngClass]="{
+          'bg-gray-200': strength === 0,
           'bg-red-400': strength === 1,
           'bg-yellow-400': strength === 2,
           'bg-orange-400': strength === 3,
           'bg-green-400': strength === 4
         }"></div>
-        <div class="h-1 flex-1 rounded" [ngClass]="{
+        <div class="h-1 rounded" [ngClass]="{
           'bg-gray-200': strength < 2,
           'bg-yellow-400': strength === 2,
           'bg-orange-400': strength === 3,
           'bg-green-400': strength === 4
         }"></div>
-        <div class="h-1 flex-1 rounded" [ngClass]="{
+        <div class="h-1 rounded" [ngClass]="{
           'bg-gray-200': strength < 3,
           'bg-orange-400': strength === 3,
           'bg-green-400': strength === 4
         }"></div>
-        <div class="h-1 flex-1 rounded" [ngClass]="{
+        <div class="h-1 rounded" [ngClass]="{
           'bg-gray-200': strength < 4,
           'bg-green-400': strength === 4
         }"></div>

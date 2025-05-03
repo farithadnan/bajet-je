@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
   imports: [CommonModule, ReactiveFormsModule, PasswordStrengthComponent],
   template: `
       <div class="mb-4">
-      <label [for]="id" class="block text-sm font-medium text-gray-700 mb-1">{{label}}</label>
+      <label *ngIf="showLabel" [for]="id" class="block text-sm font-medium text-gray-700 mb-1">{{label}}</label>
 
       <div class="relative">
         <input
@@ -44,7 +44,7 @@ import { Subject } from 'rxjs';
       <!-- Password strength meter (only for password fields with showStrength enabled) -->
       <ng-container *ngIf="type === 'password' && showStrength">
         <app-password-strength
-          [password]="control.value"
+          [password]="control.value || ''"
           [showHints]="showStrengthHints"
           [hintText]="strengthHintText">
         </app-password-strength>
@@ -67,6 +67,7 @@ import { Subject } from 'rxjs';
 export class FormInputComponent implements OnInit, OnDestroy {
   @Input() parentForm!: FormGroup;
   @Input() controlName!: string;
+  @Input() showLabel: boolean = true;
   @Input() label: string = '';
   @Input() type: string = 'text';
   @Input() id: string = '';
