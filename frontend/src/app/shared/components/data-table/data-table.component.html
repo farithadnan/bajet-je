@@ -42,7 +42,7 @@
   </div>
 
   <!-- Table -->
-  <div class="overflow-x-auto">
+  <div class="overflow-x-auto rounded-lg">
     <table class="w-full text-sm text-left rtl:text-right">
       <!-- Table Header -->
       <thead class="bg-blue-400 uppercase text-white">
@@ -147,7 +147,7 @@
   </div>
 
   <!-- Pagination -->
-  <div *ngIf="totalItems > 0" class="bg-white border-t border-gray-200 px-4 py-3 sm:px-6">
+  <div *ngIf="totalItems > 0" class="rounded-b-lg bg-white border-t border-gray-200 px-4 py-3 sm:px-6">
     <!-- Mobile pagination -->
     <div class="flex flex-1 justify-between sm:hidden">
       <button [disabled]="currentPage === 1"
