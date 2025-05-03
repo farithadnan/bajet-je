@@ -12,7 +12,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 
       <!-- Modal Container -->
       <div
-        class="relative w-full {{sizeClass}} bg-white rounder-lg shadow max-h-[90vh] overflow-y-auto mx-4 md:mx-0"
+        class="relative w-full {{sizeClass}} bg-white rounded-lg shadow max-h-[90vh] overflow-y-auto mx-4 md:mx-0"
         (click)="$event.stopPropagation()">
 
         <!-- Modal header -->
