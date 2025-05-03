@@ -46,7 +46,8 @@ const validateUpdateUser = [
     body('status')
         .optional()
         .isBoolean().withMessage('Status must be a boolean'),
-        body('newPassword')
+    body('newPassword')
+        .optional()
         .isString().withMessage('New password must be a string')
         .isLength({ min: 8 }).withMessage('New password must be at least 8 characters long')
         .custom((value, { req }) => value !== req.body.oldPassword)
@@ -62,7 +63,7 @@ router.put('/change-password', authenticateUser, validateChangePassword, handleV
 router.get('/', authenticateUser, isAdmin, getAllUsers);
 router.get('/:id', authenticateUser, validateObjectId, isAdmin, getUserById);
 
-router.post('create', authenticateUser, isAdmin, validateCreateUser, handleValidation, createUser);
+router.post('/create', authenticateUser, isAdmin, validateCreateUser, handleValidation, createUser);
 router.put('/:id', authenticateUser, validateObjectId, validateUpdateUser, handleValidation, updateUser);
 router.delete('/:id', authenticateUser, validateObjectId, isAdmin, deleteUser);
 
