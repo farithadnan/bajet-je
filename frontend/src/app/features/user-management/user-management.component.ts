@@ -3,16 +3,25 @@ import { Component, OnInit } from '@angular/core';
 import { TableQueryFilter, UserService } from '../../shared/services/user.service';
 import { SafeUser, User } from '../../core/models/user.model';
 import { ToastService } from '../../shared/services/toastr.service';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
 import { AuthService } from '../../shared/services/auth.service';
+import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { FormInputComponent } from '../../shared/components/form-input/form-input.component';
+import { FormSelectComponent } from '../../shared/components/form-select/form-select.component';
+import { FormRadioGroupComponent } from '../../shared/components/form-radio-group/form-radio-group.component';
 
 @Component({
   selector: 'app-user-management',
   imports: [
     CommonModule,
     FormsModule,
-    DataTableComponent
+    ReactiveFormsModule,
+    DataTableComponent,
+    ModalComponent,
+    FormInputComponent,
+    FormSelectComponent,
+    FormRadioGroupComponent
   ],
   standalone: true,
   templateUrl: './user-management.component.html',
@@ -94,6 +103,7 @@ export class UserManagementComponent implements OnInit {
   totalPages: number = 1;
   loading: boolean = false;
   error: string | null = null;
+  isModelOpen: boolean = false;
   Math = Math;
 
   tableData: TableQueryFilter = {
@@ -103,10 +113,26 @@ export class UserManagementComponent implements OnInit {
     role: 'all',
   }
 
+  userForm!: FormGroup;
+  isEditMode: boolean = false;
+  isSubmitting: boolean = false;
+  currentEditingUser: User | null = null;
+
+  roleOptions = [
+    { label: 'User', value: 'user' },
+    { label: 'Admin', value: 'admin' }
+  ];
+
+  statusOptions = [
+    { label: 'Active', value: true },
+    { label: 'Inactive', value: false }
+  ];
+
   constructor(
     private userService: UserService,
     private authService: AuthService,
-    private toast: ToastService
+    private toast: ToastService,
+    private fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
@@ -136,7 +162,8 @@ export class UserManagementComponent implements OnInit {
       }
 
       this.loadUsers();
-    });  }
+    });
+  }
 
   loadUsers(): void {
     this.loading = true;
@@ -180,18 +207,98 @@ export class UserManagementComponent implements OnInit {
     const { action, item } = event;
 
     if (action === 'edit') {
-      // Handle edit user
-      this.editUser(item);
+      this.openEditModal(item);
     } else if (action === 'delete') {
-      // Handle delete user
       this.deleteUser(item);
     }
   }
 
-  // Implement these methods according to your requirements
-  editUser(user: User): void {
-    console.log('Edit user:', user);
-    // Implement edit functionality
+
+  openCreateModal() {
+    // Initialize a new form for user creation
+    this.userForm = this.fb.group({
+      username: ['', [Validators.required, Validators.minLength(3)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      role: ['user', Validators.required]
+    });
+
+    // Set the mode to create (not edit)
+    this.isEditMode = false;
+    this.currentEditingUser = null;
+
+    // Open the modal
+    this.isModelOpen = true;
+  }
+
+  openEditModal(user: User) {
+    // Create a form pre-populated with the user's data
+    this.userForm = this.fb.group({
+      username: [user.username, [Validators.required, Validators.minLength(3)]],
+      email: [user.email, [Validators.required, Validators.email]],
+      role: [user.role, Validators.required],
+      status: [user.status, Validators.required]
+    });
+
+    // Set the mode to edit and store the current user
+    this.isEditMode = true;
+    this.currentEditingUser = user;
+
+    // Open the modal
+    this.isModelOpen = true;
+  }
+
+  onModalClose() {
+    this.isModelOpen = false;
+    this.resetFormState();
+  }
+
+  // Add this new method to reset all form-related state
+  resetFormState() {
+    this.userForm = null as any;
+    this.isEditMode = false;
+    this.isSubmitting = false;
+    this.currentEditingUser = null;
+  }
+
+  onSubmit() {
+    if (this.userForm.invalid) {
+      this.userForm.markAllAsTouched();
+      return;
+    }
+
+    this.isSubmitting = true;
+    const userData = this.userForm.value;
+
+    if (this.isEditMode) {
+      // Update existing user
+      this.userService.updateUser(this.currentEditingUser!._id, userData).subscribe({
+        next: (response) => {
+          this.toast.show('success', 'User updated successfully');
+          this.isModelOpen = false;
+          this.isSubmitting = false;
+          this.loadUsers();
+        },
+        error: (error) => {
+          this.toast.show('error', error.message || 'Failed to update user');
+          this.isSubmitting = false;
+        }
+      });
+    } else {
+      // Create new user
+      this.userService.createUser(userData).subscribe({
+        next: (response) => {
+          this.toast.show('success', 'User created successfully');
+          this.isModelOpen = false;
+          this.isSubmitting = false;
+          this.loadUsers();
+        },
+        error: (error) => {
+          this.toast.show('error', error.message || 'Failed to create user');
+          this.isSubmitting = false;
+        }
+      });
+    }
   }
 
   deleteUser(user: User): void {

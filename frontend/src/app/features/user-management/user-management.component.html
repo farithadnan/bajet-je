@@ -67,7 +67,7 @@
         </div>
 
         <!-- Add User button - third row on mobile, pushed right on desktop -->
-        <button class="w-full md:w-auto px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg
+        <button (click)="openCreateModal()" class="w-full md:w-auto px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg
                 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500
                 flex items-center justify-center md:justify-start gap-2 md:ml-auto">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -95,3 +95,75 @@
     </app-data-table>
   </div>
 </div>
+
+
+<app-modal
+*ngIf="userForm && userForm.controls"
+[isOpen]="isModelOpen"
+[title]="isEditMode ? 'Edit User' : 'Create New User'"
+(onClose)="onModalClose()">
+
+  <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+    <!-- Username field -->
+    <app-form-input
+      [parentForm]="userForm"
+      controlName="username"
+      label="Username"
+      id="username"
+      placeholder="Enter username">
+    </app-form-input>
+
+    <!-- Email field -->
+    <app-form-input
+      [parentForm]="userForm"
+      controlName="email"
+      label="Email"
+      type="email"
+      id="email"
+      placeholder="Enter email">
+    </app-form-input>
+
+    <!-- Password field (only for create mode) -->
+     <app-form-input
+      *ngIf="!isEditMode"
+      [parentForm]="userForm"
+      controlName="password"
+      label="password"
+      type="password"
+      id="password"
+      placeholder="Enter password"
+      [showStrength]="true">
+     </app-form-input>
+
+     <!-- Role selection -->
+    <app-form-select
+      [parentForm]="userForm"
+      controlName="role"
+      label="Role"
+      id="role"
+      [options]="roleOptions">
+    </app-form-select>
+
+     <!-- Status toggle (only for editing) -->
+     <app-form-radio-group
+      *ngIf="isEditMode && userForm.contains('status')"
+      [parentForm]="userForm"
+      controlName="status"
+      label="Status"
+      [options]="statusOptions">
+     </app-form-radio-group>
+
+     <div class="flex justify-end space-x-3">
+      <button type="button"
+        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+        (click)="onModalClose()">
+        Cancel
+      </button>
+      <button type="submit"
+        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        [disabled]="userForm.invalid || isSubmitting">
+        {{ isEditMode ? 'Update' : 'Create' }}
+      </button>
+     </div>
+  </form>
+</app-modal>
