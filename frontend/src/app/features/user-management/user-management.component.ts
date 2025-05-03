@@ -215,7 +215,7 @@ export class UserManagementComponent implements OnInit {
 
 
   openCreateModal() {
-    // Initialize a new form for user creation
+    // First create the form
     this.userForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
@@ -223,12 +223,14 @@ export class UserManagementComponent implements OnInit {
       role: ['user', Validators.required]
     });
 
-    // Set the mode to create (not edit)
+    // Set component state
     this.isEditMode = false;
     this.currentEditingUser = null;
 
-    // Open the modal
-    this.isModelOpen = true;
+    // Wait for Angular to process the form creation before opening modal
+    setTimeout(() => {
+      this.isModelOpen = true;
+    }, 0);
   }
 
   openEditModal(user: User) {

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-form-select',
@@ -27,14 +28,15 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
     </div>
   `,
 })
-export class FormSelectComponent implements OnInit {
+export class FormSelectComponent implements OnInit, OnDestroy{
   @Input() parentForm!: FormGroup;
   @Input() controlName!: string;
   @Input() label: string = '';
   @Input() id: string = '';
   @Input() options: { label: string, value: any }[] = [];
 
-  control!: FormControl;
+  control: FormControl = new FormControl('');
+  private destroy$ = new Subject<void>();
 
   ngOnInit() {
     if (this.parentForm && this.controlName) {
@@ -51,5 +53,10 @@ export class FormSelectComponent implements OnInit {
       console.error('Parent form or control name is missing');
       this.control = new FormControl('');
     }
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

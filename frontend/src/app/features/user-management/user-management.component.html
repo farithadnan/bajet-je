@@ -98,12 +98,12 @@
 
 
 <app-modal
-*ngIf="userForm && userForm.controls"
+*ngIf="isModelOpen"
 [isOpen]="isModelOpen"
 [title]="isEditMode ? 'Edit User' : 'Create New User'"
 (onClose)="onModalClose()">
 
-  <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+  <form *ngIf="userForm" [formGroup]="userForm" (ngSubmit)="onSubmit()">
     <!-- Username field -->
     <app-form-input
       [parentForm]="userForm"

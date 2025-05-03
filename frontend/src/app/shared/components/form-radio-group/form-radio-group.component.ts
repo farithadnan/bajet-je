@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-form-radio-group',
@@ -31,7 +32,8 @@ export class FormRadioGroupComponent implements OnInit{
   @Input() label: string = '';
   @Input() options: { label: string, value: any }[] = [];
 
-  control!: FormControl;
+  control: FormControl = new FormControl('');
+  private destroy$ = new Subject<void>();
 
   ngOnInit() {
     if (this.parentForm && this.controlName) {
@@ -49,4 +51,10 @@ export class FormRadioGroupComponent implements OnInit{
       this.control = new FormControl('');
     }
   }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
 }

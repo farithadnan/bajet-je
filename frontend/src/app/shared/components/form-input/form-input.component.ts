@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { PasswordStrengthComponent } from '../password-strength/password-strength.component';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-form-input',
@@ -63,7 +64,7 @@ import { PasswordStrengthComponent } from '../password-strength/password-strengt
     </div>
   `,
 })
-export class FormInputComponent implements OnInit {
+export class FormInputComponent implements OnInit, OnDestroy {
   @Input() parentForm!: FormGroup;
   @Input() controlName!: string;
   @Input() label: string = '';
@@ -78,22 +79,33 @@ export class FormInputComponent implements OnInit {
   @Input() strengthHintText: string = 'Password should contain at least 8 characters, uppercase, number, and special character';
 
   showPassword: boolean = false;
-  control!: FormControl;
+  control: FormControl = new FormControl('');
+  private destroy$ = new Subject<void>();
+
 
   ngOnInit() {
     if (this.parentForm && this.controlName) {
-      this.control = this.parentForm.get(this.controlName) as FormControl;
+      // Delay access to the control until next change detection cycle
+      setTimeout(() => {
+        this.control = this.parentForm.get(this.controlName) as FormControl;
 
-      if (!this.control) {
-        console.error(`Form control '${this.controlName}' not found in parent form`);
-        // Create a dummy control to prevent errors
-        this.control = new FormControl('');
-      }
+        if (!this.control) {
+          console.error(`Form control '${this.controlName}' not found in parent form`);
+          // Create a dummy control to prevent errors
+          this.control = new FormControl('');
+        }
+      });
     } else {
       console.error('Parent form or control name is missing');
       this.control = new FormControl('');
     }
   }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
