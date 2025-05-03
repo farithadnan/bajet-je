@@ -93,7 +93,7 @@ export class UserService {
   }
 
   updateUser(id: string, userData: UpdateUserData): Observable<UserResponse> {
-    return this.http.post<UserResponse>(`${this.apiUrl}/users/${id}`, userData, { withCredentials: true})
+    return this.http.put<UserResponse>(`${this.apiUrl}/users/${id}`, userData, { withCredentials: true})
       .pipe(
         catchError(this.util.handleError)
       )
