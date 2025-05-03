@@ -60,8 +60,8 @@ userSchema.virtual('isActive').get(function(){
 
 
 userSchema.methods.toSafeObject = function () {
-    const { _id, username, email, isActive } = this;
-    return { _id, username, email, isActive };
+    const { _id, username, email, isActive, role } = this;
+    return { _id, username, email, isActive, role };
 };
 
 // Unique index for username and email
