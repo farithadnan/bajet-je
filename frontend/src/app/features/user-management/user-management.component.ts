@@ -217,10 +217,11 @@ export class UserManagementComponent implements OnInit {
   openCreateModal() {
     // First create the form
     this.userForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
+      username: ['', [Validators.required, Validators.minLength(5)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-      role: ['user', Validators.required]
+      role: ['user', Validators.required],
+      status: [true, Validators.required]
     });
 
     // Set component state
@@ -236,7 +237,7 @@ export class UserManagementComponent implements OnInit {
   openEditModal(user: User) {
     // Create a form pre-populated with the user's data
     this.userForm = this.fb.group({
-      username: [user.username, [Validators.required, Validators.minLength(3)]],
+      username: [user.username, [Validators.required, Validators.minLength(5)]],
       email: [user.email, [Validators.required, Validators.email]],
       role: [user.role, Validators.required],
       status: [user.status, Validators.required]
