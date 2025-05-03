@@ -147,10 +147,12 @@ export class UserManagementComponent implements OnInit {
           disableConditions: {
             // Disable delete button for own user
             delete: (item: any, contextData: any) => {
-              return item._id === contextData?._id; // Can't delete yourself
+              return item._id === contextData?._id || // Can't delete yourself
+                     item.role === 'admin';
             },
             edit: (item: any, contextData: any) => {
-              return item.role === 'admin' && contextData?.role !== 'admin';
+              return item._id === contextData?._id ||
+                    (item.role === 'admin' && contextData?.role !== 'admin');
             }
           },
           disabledTooltips: {
