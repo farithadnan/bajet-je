@@ -1,6 +1,6 @@
 import express from 'express';
 import { body, param } from 'express-validator';
-import { getAllUsers, getUserById, createUser, updateUser, deleteUser, changePassword } from '../../src/controllers/userController.js';
+import { getAllUsers, getUserById, createUser, updateUser, deleteUser, changePassword, resetPassword } from '../../src/controllers/userController.js';
 import { authenticateUser, isAdmin} from '../../src/middleware/auth.js';
 import { handleValidation } from '../../src/middleware/handleValidation.js';
 
@@ -16,6 +16,13 @@ const validateChangePassword = [
         .isLength({ min: 8 }).withMessage('New password must be at least 8 characters long')
         .custom((value, { req }) => value !== req.body.oldPassword)
         .withMessage('New password must be different from old password'),
+];
+
+const validatePasswordReset = [
+    param('id').isMongoId().withMessage('Invalid ID format'),
+    body('newPassword')
+        .isString().withMessage('New password must be a string')
+        .isLength({ min: 8 }).withMessage("New password must be at least 8 characters long")
 ];
 
 const validateCreateUser = [
@@ -59,6 +66,7 @@ const validateObjectId = [
 ];
 
 router.put('/change-password', authenticateUser, validateChangePassword, handleValidation, changePassword);
+router.put('/:id/reset-password', authenticateUser, isAdmin, validatePasswordReset, handleValidation, resetPassword);
 
 router.get('/', authenticateUser, isAdmin, getAllUsers);
 router.get('/:id', authenticateUser, validateObjectId, isAdmin, getUserById);

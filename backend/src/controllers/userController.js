@@ -200,6 +200,8 @@ export const deleteUser = async (req, res) => {
     }
 };
 
+
+// For self update
 export const changePassword = async (req, res) => {
     try {
         const { oldPassword, newPassword } = req.body;
@@ -235,4 +237,45 @@ export const changePassword = async (req, res) => {
     }
 };
 
+// For admin update
+export const resetPassword = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { newPassword } = req.body;
+
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // prevent admin from resetting their own password
+        if (user.id == req.user.userId) {
+            return res.status(400).json({
+                message: "Please use the change password feature to update your own password"
+            });
+        }
+
+        // prevent resetting other admin's password
+        if (user.role === "admin" && req.user.userId !== user.id) {
+            return res.status(400).json({
+                message: "You cannot reset another admin's password"
+            });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(newPassword, salt);
+
+        user.passwordHash = passwordHash;
+        user.updatedBy = req.user.username;
+
+        await user.save();
+
+        res.status(200).json({
+            message: "User password has been reset successfully",
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+}
 
