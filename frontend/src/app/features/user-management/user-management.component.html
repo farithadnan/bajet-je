@@ -96,7 +96,7 @@
   </div>
 </div>
 
-
+<!-- Edit/Create modal -->
 <app-modal
 *ngIf="isModelOpen"
 [isOpen]="isModelOpen"
@@ -166,4 +166,42 @@
       </button>
      </div>
   </form>
+</app-modal>
+
+<!-- Reset password modal -->
+<app-modal
+  *ngIf="showPasswordResetModal"
+  [isOpen]="showPasswordResetModal"
+  [title]="'Reset Password'"
+  (onClose)="closeResetPasswordModal()">
+
+  <div class="mb-4">
+    <p class="text-gray-600 mb-4">
+      You are about to reset the password for <strong>{{ userToResetPassword?.username }}</strong>.
+      The user will need to use this new password for their next login.
+    </p>
+
+    <form *ngIf="resetPasswordForm" [formGroup]="resetPasswordForm" (ngSubmit)="onResetPassword()">
+      <app-form-input
+        [parentForm]="resetPasswordForm"
+        controlName="newPassword"
+        label="New Password"
+        type="password"
+        id="newPassword"
+        placeholder="Enter new password"
+        [showStrength]="true">
+      </app-form-input>
+
+      <div class="flex justify-end space-x-3 mt-6">
+        <button type="button" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+          (click)="closeResetPasswordModal()">
+          Cancel
+        </button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          [disabled]="resetPasswordForm.invalid || isSubmitting">
+          Reset Password
+        </button>
+      </div>
+    </form>
+  </div>
 </app-modal>

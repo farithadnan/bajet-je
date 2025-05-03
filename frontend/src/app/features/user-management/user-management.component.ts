@@ -113,10 +113,16 @@ export class UserManagementComponent implements OnInit {
     role: 'all',
   }
 
+  // Edit/create properties
   userForm!: FormGroup;
   isEditMode: boolean = false;
   isSubmitting: boolean = false;
   currentEditingUser: User | null = null;
+
+  // Reset password properties
+  resetPasswordForm!: FormGroup;
+  showPasswordResetModal = false;
+  userToResetPassword: User | null = null;
 
   roleOptions = [
     { label: 'User', value: 'user' },
@@ -143,7 +149,7 @@ export class UserManagementComponent implements OnInit {
       const actionsColumn = this.tableColumns.find(col => col.type === 'actions');
       if (actionsColumn) {
         actionsColumn.actionConfig = {
-          buttons: ['edit', 'delete'], // Only show these buttons
+          buttons: ['edit', 'delete', 'reset'], // Only show these buttons
           disableConditions: {
             // Disable delete button for own user
             delete: (item: any, contextData: any) => {
@@ -153,11 +159,16 @@ export class UserManagementComponent implements OnInit {
             edit: (item: any, contextData: any) => {
               return item._id === contextData?._id ||
                     (item.role === 'admin' && contextData?.role !== 'admin');
+            },
+            reset: (item: any, contextData: any) => {
+              return item._id === contextData?._id ||
+                     item.role === 'admin';
             }
           },
           disabledTooltips: {
             delete: "You cannot delete your own account",
-            edit: "You don't have permission to edit admin users"
+            edit: "You don't have permission to edit admin users",
+            reset: "You can't reset your own password"
           }
         };
       }
@@ -211,11 +222,12 @@ export class UserManagementComponent implements OnInit {
 
     if (action === 'edit') {
       this.openEditModal(item);
+    } else if (action === 'reset') {
+      this.openResetPassword(item);
     } else if (action === 'delete') {
       this.deleteUser(item);
     }
   }
-
 
   openCreateModal() {
     // First create the form
@@ -254,9 +266,24 @@ export class UserManagementComponent implements OnInit {
     this.isModelOpen = true;
   }
 
+  openResetPassword(user: User) {
+    this.resetPasswordForm = this.fb.group({
+      newPassword: ['', [Validators.required, Validators.minLength(8)]]
+    });
+
+    this.userToResetPassword = user;
+    this.showPasswordResetModal = true;
+  }
+
   onModalClose() {
     this.isModelOpen = false;
     this.resetFormState();
+  }
+
+  closeResetPasswordModal() {
+    this.showPasswordResetModal = false;
+    this.resetPasswordForm = null as any;
+    this.userToResetPassword = null;
   }
 
   // Add this new method to reset all form-related state
@@ -265,6 +292,28 @@ export class UserManagementComponent implements OnInit {
     this.isEditMode = false;
     this.isSubmitting = false;
     this.currentEditingUser = null;
+  }
+
+  onResetPassword() {
+    if (this.resetPasswordForm.invalid) {
+      this.resetPasswordForm.markAllAsTouched();
+      return;
+    }
+
+    this.isSubmitting = true;
+    const { newPassword } = this.resetPasswordForm.value;
+    const userId = this.userToResetPassword!._id;
+
+    this.userService.resetUserPassword(userId, newPassword).subscribe({
+      next: (response) => {
+        this.toast.show('success', 'Password reset successfully');
+        this.showPasswordResetModal = false;
+        this.isSubmitting = false;
+      },
+      error: (error) => {
+        this.toast.show('error', error.message || 'Failed to reset password');
+      }
+    })
   }
 
   onSubmit() {

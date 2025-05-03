@@ -107,4 +107,12 @@ export class UserService {
         catchError(this.util.handleError)
       );
   }
+
+
+  resetUserPassword(userId: string, newPassword: string): Observable<UserResponse> {
+    return this.http.put<UserResponse>(`${this.apiUrl}/users/${userId}/reset-password`, {newPassword}, { withCredentials: true})
+      .pipe(
+        catchError(this.util.handleError)
+      );
+  }
 }

@@ -21,7 +21,7 @@ export interface TableColumn {
   dateFormat?: string; // For date type columns
   actionConfig?: {
     // Define which buttons to show (default is all)
-    buttons?: ('edit' | 'delete' | 'view')[];
+    buttons?: ('edit' | 'delete' | 'view' | 'reset')[];
 
     // Custom disable conditions for each button
     disableConditions?: {
@@ -29,6 +29,7 @@ export interface TableColumn {
       edit?: (item: any, contextData?: any) => boolean;
       delete?: (item: any, contextData?: any) => boolean;
       view?: (item: any, contextData?: any) => boolean;
+      reset?: (item: any, contextData?: any) => boolean;
     };
 
     // Custom tooltip messages when buttons are disabled
@@ -36,6 +37,7 @@ export interface TableColumn {
       edit?: string;
       delete?: string;
       view?: string;
+      reset?: string;
     };
   };
 }
@@ -133,7 +135,7 @@ export class DataTableComponent implements OnChanges {
   }
 
   // Check if a specific action button should be disabled
-  isActionDisabled(item: any, col: TableColumn, actionType: 'edit' | 'delete' | 'view'): boolean {
+  isActionDisabled(item: any, col: TableColumn, actionType: 'edit' | 'delete' | 'view' | 'reset'): boolean {
     if (!col.actionConfig || !col.actionConfig.disableConditions) {
       return false; // Default: not disabled
     }
@@ -147,7 +149,7 @@ export class DataTableComponent implements OnChanges {
   }
 
   // Get tooltip for disabled buttons
-  getDisabledTooltip(col: TableColumn, actionType: 'edit' | 'delete' | 'view'): string {
+  getDisabledTooltip(col: TableColumn, actionType: 'edit' | 'delete' | 'view' | 'reset'): string {
     if (!col.actionConfig || !col.actionConfig.disabledTooltips) {
       return `Cannot ${actionType}`; // Default tooltip
     }
