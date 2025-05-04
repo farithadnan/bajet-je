@@ -166,9 +166,9 @@ export class UserManagementComponent implements OnInit {
             }
           },
           disabledTooltips: {
-            delete: "You cannot delete your own account",
+            delete: "You cannot delete this account",
             edit: "You don't have permission to edit admin users",
-            reset: "You can't reset your own password"
+            reset: "You can't reset this password"
           }
         };
       }

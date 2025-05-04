@@ -31,6 +31,12 @@ export const routes: Routes = [
         canActivate: [AuthGuard, AdminGuard],
         loadComponent: () => import('./features/user-management/user-management.component').then(m => m.UserManagementComponent),
         data: { title: 'User Management' }
+      },
+      {
+        path: 'budget-template',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./features/budget-template/budget-template.component').then(m => m.BudgetTemplateComponent),
+        data: { title: 'Budget Template' }
       }
     ]
   },
