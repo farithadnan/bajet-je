@@ -1,3 +1,5 @@
+import { AuditInfo } from "./audit-info.model";
+
 export enum UserRole {
   Admin = 'admin',
   User = 'users'
@@ -28,15 +30,6 @@ export interface LastLoginInfo extends AuditInfo {
   lastLoginBrowser: string,
   lastLoginOs: string,
   lastLoginDevice: string,
-}
-
-export interface AuditInfo {
-  createdBy: string,
-  updatedBy: string,
-  deletedBy: string,
-  deletedDate: string,
-  createdDate: string,
-  updatedDate: string,
 }
 
 
