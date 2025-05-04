@@ -33,15 +33,33 @@ export const createBudgetTemplate = async (req, res) => {
 export const getAllBudgetTemplates = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
+        const limit = parseInt(req.query.limit) || 10;
+        const search = req.query.search;
+        const status = req.query.status !== undefined ? req.query.status === "true" : null;
+        
+        const filter = {};
 
-        const budgetTemplates = await BudgetTemplate.find({ userId: req.user.userId })
+        if (search) {
+            filter = {
+              templateName: { $regex: search, $options: "i" },
+            };
+        }
+
+        if (status !== null) {
+            filter.status = status;
+        }
+
+        if (req.user.role !== 'admin') {
+            filter.userId = req.user.userId;
+        }
+
+        const budgetTemplates = await BudgetTemplate.find(filter)
             .skip((page - 1) * limit)
             .limit(limit)
-            .select("-__v -userId")
+            .select("-__v")
             .lean();
 
-        const totalTemplates = await BudgetTemplate.countDocuments({ userId: req.user.userId });
+        const totalTemplates = await BudgetTemplate.countDocuments(filter);
         res.json({
             budgetTemplates,
             totalTemplates,
