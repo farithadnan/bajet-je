@@ -275,21 +275,16 @@ export class UserManagementComponent implements OnInit {
 
   onModalClose() {
     this.isModelOpen = false;
-    this.resetFormState();
+    this.userForm = null as any;
+    this.isEditMode = false;
+    this.isSubmitting = false;
+    this.currentEditingUser = null;
   }
 
   closeResetPasswordModal() {
     this.showPasswordResetModal = false;
     this.resetPasswordForm = null as any;
     this.userToResetPassword = null;
-  }
-
-  // Add this new method to reset all form-related state
-  resetFormState() {
-    this.userForm = null as any;
-    this.isEditMode = false;
-    this.isSubmitting = false;
-    this.currentEditingUser = null;
   }
 
   onResetPassword() {
