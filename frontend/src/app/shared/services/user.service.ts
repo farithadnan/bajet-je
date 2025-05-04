@@ -4,23 +4,11 @@ import { SafeUser, User } from "../../core/models/user.model";
 import { catchError, Observable } from "rxjs";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { UtilsService } from "./utils.services";
+import { PaginatedResponse, TableQueryFilter } from "../models/table.model";
 
 
-export interface TableQueryFilter {
-  page?: number;
-  limit?: number;
-  search?: string;
-  role?: string;
-  status?: boolean;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface GetAllUsersResponse {
-  users: User[],
-  totalUsers: number,
-  totalPages: number,
-  currentPage: number,
+export interface GetAllUsersResponse extends PaginatedResponse<User> {
+  users: User[];
 }
 
 export interface UserResponse {

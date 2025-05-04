@@ -1,15 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { TableQueryFilter, UserService } from '../../shared/services/user.service';
+import { UserService } from '../../shared/services/user.service';
 import { SafeUser, User } from '../../core/models/user.model';
 import { ToastService } from '../../shared/services/toastr.service';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
+import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { AuthService } from '../../shared/services/auth.service';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { FormInputComponent } from '../../shared/components/form-input/form-input.component';
 import { FormSelectComponent } from '../../shared/components/form-select/form-select.component';
 import { FormRadioGroupComponent } from '../../shared/components/form-radio-group/form-radio-group.component';
+import { TableColumn, TableQueryFilter } from '../../shared/models/table.model';
 
 @Component({
   selector: 'app-user-management',
@@ -102,7 +103,6 @@ export class UserManagementComponent implements OnInit {
   currentPage: number = 1;
   totalPages: number = 1;
   loading: boolean = false;
-  error: string | null = null;
   isModelOpen: boolean = false;
   Math = Math;
 
@@ -179,19 +179,17 @@ export class UserManagementComponent implements OnInit {
 
   loadUsers(): void {
     this.loading = true;
-    this.error = null;
 
     this.userService.getAllUsers(this.tableData).subscribe({
       next: (response) => {
         this.users = response.users;
-        this.totalUsers = response.totalUsers;
+        this.totalUsers = response.totalItems;
         this.currentPage = response.currentPage;
         this.totalPages = response.totalPages;
         this.loading = false;
       },
       error: (error) => {
-        this.error = error.message || 'Failed to load users';
-        this.toast.show('error', this.error ?? 'An unknown error occurred');
+        this.toast.show('error', error.message ?? 'An unknown error occurred');
         this.loading = false;
       }
     })
