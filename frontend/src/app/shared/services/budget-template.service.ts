@@ -3,14 +3,30 @@ import { environment } from "../../../environments/environment.prod";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { UtilsService } from "./utils.services";
 import { PaginatedResponse, TableQueryFilter } from "../models/table.model";
-import { BudgetTemplate } from "../../core/models/budget-template.model";
+import { BudgetTemplate, FormulaItem } from "../../core/models/budget-template.model";
 import { catchError, Observable } from "rxjs";
 
 
 export interface GetAllTemplatesResponse extends PaginatedResponse<BudgetTemplate> {
-  templates: BudgetTemplate[];
+  budgetTemplates: BudgetTemplate[];
+  totalTemplates: number;
 }
 
+export interface TemplateResponse {
+  message: string,
+  budgetTemplate?: BudgetTemplate
+}
+
+export interface CreateTemplateData {
+  templateName: string;
+  formula: FormulaItem[]
+}
+
+export interface UpdateTemplateData {
+  templateName: string;
+  status: boolean;
+  formula: FormulaItem[]
+}
 
 @Injectable({
   providedIn: "root"
@@ -47,5 +63,26 @@ export class BudgetTemplateService {
     .pipe(
       catchError(this.util.handleError)
     )
+  }
+
+  createTemplate(templateData: CreateTemplateData): Observable<TemplateResponse> {
+    return this.http.post<TemplateResponse>(`${this.apiUrl}/budget-templates`, templateData, { withCredentials: true })
+      .pipe(
+        catchError(this.util.handleError)
+      )
+  }
+
+  updateTemplate(id: string, templateData: UpdateTemplateData): Observable<TemplateResponse> {
+    return this.http.put<TemplateResponse>(`${this.apiUrl}/budget-templates/${id}`, templateData, { withCredentials: true })
+      .pipe(
+        catchError(this.util.handleError)
+      )
+  }
+
+  deleteTemplate(id: string): Observable<TemplateResponse> {
+    return this.http.delete<TemplateResponse>(`${this.apiUrl}/budget-templates/${id}`, { withCredentials: true })
+      .pipe(
+        catchError(this.util.handleError)
+      )
   }
 }

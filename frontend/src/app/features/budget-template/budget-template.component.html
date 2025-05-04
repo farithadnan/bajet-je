@@ -62,6 +62,7 @@
      <app-data-table
       [data]="templates"
       [columns]="tableColumns"
+      [loading]="loading"
       [emptyMessage]="'No templates found'"
       [totalItems]="totalTemplates"
       [currentPage]="currentPage"
@@ -71,5 +72,111 @@
       (pageChange)="onPageChange($event)"
       (rowAction)="handleTemplateAction($event)">
      </app-data-table>
+
+     <!-- Edit/Create modal -->
+      <app-modal
+        *ngIf="isModalOpen"
+        [isOpen]="isModalOpen"
+        [title]="isEditMode ? 'Edit Template' : 'Create New Template'"
+        (onClose)="onModalClose()"
+      >
+        <form [formGroup]="templateForm" (ngSubmit)="onSubmit()">
+
+          <!-- Template name -->
+          <app-form-input [parentForm]="templateForm" controlName="templateName" label="Template Name" type="text"
+            id="templateName" placeholder="Enter template name">
+          </app-form-input>
+
+          <!-- Status -->
+          <app-form-radio-group *ngIf="isEditMode && templateForm.contains('status')" [parentForm]="templateForm" controlName="status"
+            label="Status" [options]="statusOptions">
+          </app-form-radio-group>
+
+          <!-- Formula Section -->
+          <div class="mb-4">
+            <div class="flex justify-between items-center mb-2">
+              <label class="block text-sm font-medium text-gray-700">Formula Items</label>
+              <span class="text-sm"
+                [ngClass]="{'text-green-600': getTotalPercentage() <= 100, 'text-red-600': getTotalPercentage() > 100}">
+                Total: {{ getTotalPercentage() }}%
+              </span>
+            </div>
+
+            <!-- Formula array container -->
+            <div formArrayName="formula" class="space-y-3">
+              <div *ngFor="let formulaGroup of formulaArray.controls; let i = index" [formGroupName]="i"
+                class="p-3 border border-gray-200 rounded-md relative">
+
+                <!-- Delete formula button -->
+                <button type="button" *ngIf="formulaArray.controls.length > 1" (click)="removeFormula(i)"
+                  class="absolute top-2 right-2 text-gray-500 hover:text-red-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </button>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Label input -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Label</label>
+                    <input type="text" formControlName="label"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., Housing">
+
+                    <div *ngIf="formulaGroup.get('label')?.invalid && formulaGroup.get('label')?.touched"
+                      class="text-red-600 text-xs mt-1">
+                      Label is required and must be at least 3 characters.
+                    </div>
+                  </div>
+
+                  <!-- Percentage input -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Percentage (%)</label>
+                    <input type="number" formControlName="percentage"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="1" max="100" placeholder="e.g., 25">
+
+                    <div *ngIf="formulaGroup.get('percentage')?.invalid && formulaGroup.get('percentage')?.touched"
+                      class="text-red-600 text-xs mt-1">
+                      Percentage must be between 1 and 100.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add formula button -->
+            <button type="button" (click)="addFormula()" [disabled]="getTotalPercentage() >= 100"
+              class="mt-3 flex items-center text-sm text-blue-600 hover:text-blue-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M10 3a1 1 0 00-1 1v5H4a1 1 0 100 2h5v5a1 1 0 102 0v-5h5a1 1 0 100-2h-5V4a1 1 0 00-1-1z"
+                  clip-rule="evenodd" />
+              </svg>
+              Add Formula Item
+            </button>
+
+            <!-- Total percentage error message -->
+            <div *ngIf="formulaArray.errors?.['totalExceeded']" class="text-red-600 text-sm mt-2">
+              Total percentage cannot exceed 100%.
+            </div>
+          </div>
+
+          <div class="flex justify-end space-x-3">
+            <button type="button"
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              (click)="onModalClose()">
+              Cancel
+            </button>
+            <button type="submit"
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [disabled]="templateForm.invalid || isSubmitting">
+              {{ isEditMode ? 'Update' : 'Create' }}
+            </button>
+          </div>
+        </form>
+      </app-modal>
   </div>
 </div>
