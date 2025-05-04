@@ -56,6 +56,7 @@ export const getAllBudgetTemplates = async (req, res) => {
         const budgetTemplates = await BudgetTemplate.find(filter)
             .skip((page - 1) * limit)
             .limit(limit)
+            .populate('userId', 'username email')
             .select("-__v")
             .lean();
 
