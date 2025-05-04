@@ -6,7 +6,7 @@ export const getAllUsers = async (req, res) => {
     try {
         // Return all users
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
+        const limit = parseInt(req.query.limit) || 10;
         const search = req.query.search;
         const role = req.query.role !== 'all' ? req.query.role : null;
         const status = req.query.status !== undefined ? req.query.status === "true" : null; 
