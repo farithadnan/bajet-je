@@ -150,7 +150,7 @@
         </tr>
 
         <!-- No data message -->
-        <tr *ngIf="data.length === 0 && !loading" class="bg-white">
+        <tr *ngIf="data === undefined || data.length === 0 && !loading" class="bg-white">
           <td [attr.colspan]="columns.length" class="px-6 py-8 text-center text-gray-600">
             {{ emptyMessage }}
           </td>
