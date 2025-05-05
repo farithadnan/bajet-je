@@ -33,6 +33,12 @@ export const routes: Routes = [
         data: { title: 'User Management' }
       },
       {
+        path: 'monthly-budget',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./features/monthly-budget/monthly-budget.component').then(m => m.MonthlyBudgetComponent),
+        data: { title: 'Monthly Budget' }
+      },
+      {
         path: 'budget-template',
         canActivate: [AuthGuard],
         loadComponent: () => import('./features/budget-template/budget-template.component').then(m => m.BudgetTemplateComponent),
