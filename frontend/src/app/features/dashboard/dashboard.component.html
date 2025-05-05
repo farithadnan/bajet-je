@@ -1,1 +1,174 @@
-<p>dashboard works!</p>
+<div *ngIf="loading" class="flex justify-center my-4">
+  <div>Loading dashboard data...</div>
+</div>
+
+<div *ngIf="!loading" class="max-w-full mx-auto p-3">
+  <!-- Summary cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <!-- Current Month Budget -->
+    <div class="bg-white p-4 rounded-lg shadow-md">
+      <h2 class="text-sm font-medium text-gray-600 mb-1">Current Month</h2>
+      <div *ngIf="dashboardData.currentBudget; else noBudget">
+        <p class="text-xl font-bold text-gray-800">{{ getMonthName(dashboardData.currentBudget.month) }} {{
+          dashboardData.currentBudget.year }}</p>
+        <div class="mt-2 flex justify-between">
+          <span class="text-sm text-gray-600">Income:</span>
+          <span class="text-sm font-medium">{{ formatCurrency(dashboardData.currentBudget.totalIncome) }}</span>
+        </div>
+        <div class="mt-1 flex justify-between">
+          <span class="text-sm text-gray-600">Expenses:</span>
+          <span class="text-sm font-medium">{{ formatCurrency(dashboardData.currentBudget.totalExpenses) }}</span>
+        </div>
+        <div class="mt-1 flex justify-between">
+          <span class="text-sm text-gray-600">Remaining:</span>
+          <span
+            [ngClass]="{'text-green-600': dashboardData.currentBudget.remainingAmount >= 0, 'text-red-600': dashboardData.currentBudget.remainingAmount < 0}"
+            class="text-sm font-medium">
+            {{ formatCurrency(dashboardData.currentBudget.remainingAmount) }}
+          </span>
+        </div>
+      </div>
+      <ng-template #noBudget>
+        <p class="text-gray-600">No budget found for the current month</p>
+        <button routerLink="/monthly-budgets/create"
+          class="mt-2 px-4 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
+          Create Budget
+        </button>
+      </ng-template>
+    </div>
+
+    <!-- Total Income -->
+    <div class="bg-white p-4 rounded-lg shadow-md">
+      <h2 class="text-sm font-medium text-gray-600 mb-1">Total Income ({{ dashboardData.summary?.months || 0 }} months)
+      </h2>
+      <p class="text-xl font-bold text-gray-800">{{ formatCurrency(dashboardData.summary?.totalIncome || 0) }}</p>
+      <div class="mt-2 text-sm text-gray-600">
+        <span>Avg: {{ formatCurrency(dashboardData.summary?.averageIncome || 0) }} per month</span>
+      </div>
+    </div>
+
+    <!-- Total Expenses -->
+    <div class="bg-white p-4 rounded-lg shadow-md">
+      <h2 class="text-sm font-medium text-gray-600 mb-1">Total Expenses ({{ dashboardData.summary?.months || 0 }}
+        months)</h2>
+      <p class="text-xl font-bold text-gray-800">{{ formatCurrency(dashboardData.summary?.totalExpenses || 0) }}</p>
+      <div class="mt-2 text-sm text-gray-600">
+        <span>Avg: {{ formatCurrency(dashboardData.summary?.averageExpenses || 0) }} per month</span>
+      </div>
+    </div>
+
+    <!-- Savings Rate -->
+    <div class="bg-white p-4 rounded-lg shadow-md">
+      <h2 class="text-sm font-medium text-gray-600 mb-1">Savings Rate</h2>
+      <p class="text-xl font-bold text-gray-800">{{ (dashboardData.summary?.savingsRate || 0).toFixed(1) }}%</p>
+      <div class="mt-2 text-sm text-gray-600">
+        <span>{{ formatCurrency((dashboardData.summary?.totalIncome || 0) - (dashboardData.summary?.totalExpenses || 0))
+          }} saved total</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Category breakdown -->
+    <div class="bg-white p-4 rounded-lg shadow-md">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-lg font-medium text-gray-800">Budget vs. Spending</h2>
+        <div class="text-sm text-gray-600" *ngIf="dashboardData.currentBudget">
+          {{ getMonthName(dashboardData.currentBudget.month) }} {{ dashboardData.currentBudget.year }}
+        </div>
+      </div>
+
+      <div class="flex justify-center items-center">
+        <div class="w-full max-w-md h-64">
+          <canvas #expenseChart></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly overview -->
+    <div class="bg-white p-4 rounded-lg shadow-md">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-lg font-medium text-gray-800">Monthly Overview</h2>
+        <div class="text-sm text-gray-600">{{ currentYear }}</div>
+      </div>
+
+      <div class="flex justify-center items-center">
+        <div class="w-full max-w-md h-64">
+          <canvas #monthlyChart></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category breakdown and recent expenses -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Category breakdown progress bars -->
+    <div class="bg-white p-4 rounded-lg shadow-md">
+
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-lg font-medium text-gray-800">Category Breakdown</h2>
+        <div class="text-sm text-gray-600" *ngIf="dashboardData.currentBudget">
+          {{ getMonthName(dashboardData.currentBudget.month) }} {{ dashboardData.currentBudget.year }}
+        </div>
+      </div>
+
+      <div *ngIf="dashboardData.categoryBreakdown.length > 0; else noCategories" class="space-y-4">
+        <div *ngFor="let category of dashboardData.categoryBreakdown" class="space-y-1">
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-medium">{{ category.category }}</span>
+            <span class="text-xs text-gray-600">
+              {{ formatCurrency(category.spent) }} / {{ formatCurrency(category.allocated) }}
+              ({{ category.percentageUsed.toFixed(1) }}%)
+            </span>
+          </div>
+          <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div [ngStyle]="{'width': calculateProgressBarWidth(category.percentageUsed)}"
+              [ngClass]="getProgressBarColor(category.percentageUsed)" class="h-full rounded-full"></div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noCategories>
+        <p class="text-gray-600">No categories found for the current month</p>
+      </ng-template>
+    </div>
+
+    <!-- Recent expenses -->
+    <div class="bg-white p-4 rounded-lg shadow-md">
+
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-lg font-medium text-gray-800">Recent Expenses</h2>
+        <div class="text-sm text-gray-600" *ngIf="dashboardData.currentBudget">
+          {{ getMonthName(dashboardData.currentBudget.month) }} {{ dashboardData.currentBudget.year }}
+        </div>
+      </div>
+
+      <div *ngIf="dashboardData.recentExpenses.length > 0; else noExpenses" class="divide-y divide-gray-200">
+        <div *ngFor="let expense of dashboardData.recentExpenses" class="py-3 first:pt-0 last:pb-0">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-sm font-medium">{{ expense.name }}</p>
+              <p class="text-xs text-gray-600">{{ expense.label }} • {{ formatDate(expense.expensedDate) }}</p>
+            </div>
+            <p class="text-sm font-medium">{{ formatCurrency(expense.amount) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noExpenses>
+        <p class="text-gray-600">No recent expenses found</p>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+    <button routerLink="/monthly-budget" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+      Manage Budgets
+    </button>
+    <button routerLink="/budget-template" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+      Manage Templates
+    </button>
+  </div>
+</div>
