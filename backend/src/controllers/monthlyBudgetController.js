@@ -41,22 +41,57 @@ export const createMonthlyBudget = async (req, res) => {
 // Get all monthly budgets of a user
 export const getAllMonthlyBudgets = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const search = req.query.search;
+      const status = req.query.status !== undefined ? req.query.status === "true" : null;
+      const month = req.query.month ? parseInt(req.query.month) : null;
+      const year = req.query.year ? parseInt(req.query.year) : null;
 
-        const monthlyBudgets = await MonthlyBudget.find({ userId: req.user.userId })
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .select("-__v -userId")
-            .lean();
+      const filter = {};
 
-        const totalBudgets = await MonthlyBudget.countDocuments({ userId: req.user.userId });
-        res.json({
-            monthlyBudgets,
-            totalBudgets,
-            totalPages: Math.ceil(totalBudgets / limit),
-            currentPage: page,
-        });
+      if (status !== null) {
+        filter.status = status;
+      }
+
+      if (req.user.role !== "admin") {
+        filter.userId = req.user.userId;
+      }
+
+      // Add month filter if provided
+      if (month !== null && month >= 1 && month <= 12) {
+        filter.month = month;
+      }
+
+      // Add year filter if provided
+      if (year !== null && year >= 2000 && year <= 2100) {
+        filter.year = year;
+      }
+
+      // Add search filter for text fields
+      if (search) {
+        // Use $or to search across multiple fields
+        // We'll populate budgetTemplateId to search by template name
+        filter = {
+          ...filter,
+          $or: [{ "expenses.name": { $regex: search, $options: "i" } }, { createdBy: { $regex: search, $options: "i" } }],
+        };
+      }
+
+      const monthlyBudgets = await MonthlyBudget.find(filter)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate("budgetTemplateId", "templateName")
+        .select("-__v")
+        .lean();
+
+      const totalBudgets = await MonthlyBudget.countDocuments(filter);
+      res.json({
+        monthlyBudgets,
+        totalBudgets,
+        totalPages: Math.ceil(totalBudgets / limit),
+        currentPage: page,
+      });
     }
     catch(error) {
         res.status(500).json({ message: "Server error", error: error.message });
