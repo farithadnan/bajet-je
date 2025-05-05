@@ -61,8 +61,9 @@
           <td *ngFor="let col of columns" [ngClass]="col.hidden ? 'hidden lg:table-cell' : ''" scope="row"
             class="px-6 py-4">
             <!-- Text column -->
-            <ng-container *ngIf="col.type === 'text' || !col.type">
-              {{ item[col.field] }}
+            <ng-container *ngIf="col.type === 'text'">
+              <span *ngIf="col.formatter">{{ col.formatter(item) }}</span>
+              <span *ngIf="!col.formatter">{{ item[col.field] }}</span>
             </ng-container>
 
             <!-- Avatar column -->
@@ -91,6 +92,13 @@
                 <span class="text-gray-400 italic">Never</span>
               </ng-template>
             </ng-container>
+
+
+            <!-- Custom column -->
+            <ng-container *ngIf="col.type === 'custom'">
+              <span [innerHTML]="col.formatter ? col.formatter(item) : item[col.field]"></span>
+            </ng-container>
+
 
             <!-- Actions column -->
             <ng-container *ngIf="col.type === 'actions'">

@@ -68,21 +68,30 @@ export class DataTableComponent implements OnChanges {
   }
 
   // Helper method for badge configuration
-  getBadgeClasses(item: any, badgeConfig: TableColumn['badgeConfig']): string {
-    if (!badgeConfig) return '';
-
-    const condition = badgeConfig.conditions.find(c => c.value === item[badgeConfig.field]);
-    if (!condition) return '';
-
-    return `${condition.bgClass} ${condition.textClass}`;
+  getBadgeClasses(item: any, badgeConfig: any): string {
+    const value = this.getBadgeValue(item, badgeConfig);
+    const condition = badgeConfig.conditions.find((c: any) => c.value === value);
+    return condition ? `${condition.bgClass} ${condition.textClass}` : '';
   }
 
-  // Helper method for badge display text
-  getBadgeDisplay(item: any, badgeConfig: TableColumn['badgeConfig']): string {
-    if (!badgeConfig) return '';
+  getBadgeValue(item: any, badgeConfig: any): any {
+    if (badgeConfig.valueGetter) {
+      return badgeConfig.valueGetter(item);
+    }
+    return item[badgeConfig.field];
+  }
 
-    const condition = badgeConfig.conditions.find(c => c.value === item[badgeConfig.field]);
-    return condition?.display || '';
+  getBadgeDisplay(item: any, badgeConfig: any): string {
+    const value = this.getBadgeValue(item, badgeConfig);
+    const condition = badgeConfig.conditions.find((c: any) => c.value === value);
+
+    if (!condition) return '';
+
+    if (typeof condition.display === 'function') {
+      return condition.display(item);
+    }
+
+    return condition.display;
   }
 
   // Check if a specific action button should be shown

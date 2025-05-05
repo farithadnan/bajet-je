@@ -3,13 +3,15 @@ export interface TableColumn {
   field: string;       // Property name in data object
   type?: 'text' | 'avatar' | 'badge' | 'date' | 'actions' | 'custom'; // Column type
   hidden?: boolean;    // Hide on mobile/small screens
+  formatter?: (item: any) => string; // Custom formatter function for cell display
   badgeConfig?: {      // For badge type columns
     field: string;     // Field to check
+    valueGetter?: (item: any) => any; // Optional function to compute a value
     conditions: {
       value: any;
       bgClass: string;
       textClass: string;
-      display: string;
+      display: string | ((item: any) => string); // Can be static string or function
     }[];
   };
   dateFormat?: string; // For date type columns
