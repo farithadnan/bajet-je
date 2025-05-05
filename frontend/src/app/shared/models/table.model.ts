@@ -43,6 +43,8 @@ export interface TableQueryFilter {
   role?: string;
   flag?: string;
   status?: boolean;
+  month?: number;
+  year?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
