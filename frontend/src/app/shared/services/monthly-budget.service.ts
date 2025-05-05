@@ -88,7 +88,7 @@ export class MonthlyBudgetService {
   }
 
   updateMonthlyBudget(id: string, budgetData: UpdateMonthlyBudgetData): Observable<MonthlyBudgetResponse> {
-    return this.http.put<MonthlyBudgetResponse>(`${this.apiUrl}/monthly-budgets`, budgetData, {withCredentials: true})
+    return this.http.put<MonthlyBudgetResponse>(`${this.apiUrl}/monthly-budgets/${id}`, budgetData, {withCredentials: true})
       .pipe(
         catchError(this.util.handleError)
       )

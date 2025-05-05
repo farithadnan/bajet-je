@@ -13,11 +13,15 @@ export interface MonthlyBudgetExpenses {
   expensedDate: Date,
 }
 
+export interface BudgetTemplateReference {
+  _id: string,
+  templateName: string
+}
 
 export interface MonthlyBudget extends AuditInfo {
   _id: string,
   userId: string,
-  budgetTemplateId: string,
+  budgetTemplateId: string | BudgetTemplateReference,
   month: number,
   year: number,
   totalIncome: number,
