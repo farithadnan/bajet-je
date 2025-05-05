@@ -274,7 +274,6 @@ export class MonthlyBudgetComponent implements OnInit {
     this.isViewMode = false;
     this.isModalOpen = true;
   }
-
   openEditModal(budget: MonthlyBudget) {
     const formulaControls = budget.formula.map(item =>
       this.fb.group({
@@ -300,7 +299,7 @@ export class MonthlyBudgetComponent implements OnInit {
 
     this.budgetForm = this.fb.group({
       _id: [budget._id],
-      budgetTemplateId: [templateId, Validators.required], // Use just the ID
+      budgetTemplateId: [templateId, Validators.required],
       month: [budget.month, [Validators.required, Validators.min(1), Validators.max(12)]],
       year: [budget.year, [Validators.required, Validators.min(2000), Validators.max(2100)]],
       totalIncome: [budget.totalIncome, [Validators.required, Validators.min(0)]],
@@ -315,10 +314,42 @@ export class MonthlyBudgetComponent implements OnInit {
   }
 
   openViewModal(budget: MonthlyBudget) {
-    this.openEditModal(budget);
-    this.budgetForm.disable();
+    const formulaControls = budget.formula.map(item =>
+      this.fb.group({
+        label: [{ value: item.label, disabled: true }, Validators.required],
+        percentage: [{ value: item.percentage, disabled: true }, [Validators.required, Validators.min(1), Validators.max(100)]],
+        allocatedAmount: [{ value: item.allocatedAmount, disabled: true }]
+      })
+    );
+
+    const expensesControls = budget.expenses.map(expense =>
+      this.fb.group({
+        name: [{ value: expense.name, disabled: true }, Validators.required],
+        amount: [{ value: expense.amount, disabled: true }, [Validators.required, Validators.min(0)]],
+        label: [{ value: expense.label, disabled: true }, Validators.required],
+        expensedDate: [{ value: expense.expensedDate, disabled: true }]
+      })
+    );
+
+    // Extract the template ID - handle both object and string cases
+    const templateId = typeof budget.budgetTemplateId === 'object' && budget.budgetTemplateId !== null
+      ? budget.budgetTemplateId._id  // Extract ID from object
+      : budget.budgetTemplateId;     // Use directly if already a string
+
+    this.budgetForm = this.fb.group({
+      _id: [{ value: budget._id, disabled: true }],
+      budgetTemplateId: [{ value: templateId, disabled: true }, Validators.required],
+      month: [{ value: budget.month, disabled: true }, [Validators.required, Validators.min(1), Validators.max(12)]],
+      year: [{ value: budget.year, disabled: true }, [Validators.required, Validators.min(2000), Validators.max(2100)]],
+      totalIncome: [{ value: budget.totalIncome, disabled: true }, [Validators.required, Validators.min(0)]],
+      formula: this.fb.array(formulaControls),
+      expenses: this.fb.array(expensesControls),
+      status: [{ value: budget.status, disabled: true }, Validators.required]
+    });
+
     this.isViewMode = true;
     this.isEditMode = false;
+    this.isModalOpen = true;
   }
 
   onModalClose() {
